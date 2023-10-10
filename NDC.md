@@ -1,8 +1,8 @@
-Introduction :
+### Introduction :
 
 Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
 
-Liste des objets:
+### Liste des objets:
 	- Ressources (comprend Films, Musiques, Livres)
 	- Exemplaires
 	- Utilisateurs (comprend les Membres et les Adhérents)
@@ -11,13 +11,13 @@ Liste des objets:
 
 
 
-Héritages:
+### Héritages:
 	- Films, Musiques et Livres héritent des caractéristiques des Ressources
 	- Membres et Adhérents héritent des caractéristiques des Utilisateurs
 	- Ces deux héritages seront exclusifs
 
 
-Liste des classes objets avec propriétés, associations et contraintes:
+### Liste des classes objets avec propriétés, associations et contraintes:
 
 	>Ressources:
 		- Code (clé): int
@@ -29,10 +29,10 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Prix: float
 
 		*Association:
-		- Composé par des Exemplaires (composition)
+		    - Composé par des Exemplaires (composition)
 
 		*Contraintes:
-        - NA
+            - NA
 
 
 	>Livres:
@@ -41,10 +41,10 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Langue: varchar
 
 		*Associations:
-		- En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
+		    - En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
 
 		*Contraintes:
-		- NA
+		    - NA
 
 
 	>Films:
@@ -53,22 +53,22 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Durée: int
 
 		*Associations:
-		- En collaboration avec une liste de (Collaborateurs) réalisateurs (*-*)
-        - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
+		    - En collaboration avec une liste de (Collaborateurs) réalisateurs (*-*)
+            - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
 
 		*Contraintes:
-		- NA
+		    - NA
 
 
 	>Musiques:
 		- Durée: int
 
 		*Associations:
-		- En collaboration avec une liste de (Collaborateurs) compositeurs (*-*)
-        - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
+		    - En collaboration avec une liste de (Collaborateurs) compositeurs (*-*)
+            - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
 
 		*Contraintes:
-		- NA
+		    - NA
 
 
 	> Collaborateur:
@@ -78,10 +78,10 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Nationalité: varchar
 
 		*Associations:
-		- NA
+		    - NA
 			
 		*Contraintes:
-		- NA
+		    - NA
 		
 
 	>Utilisateurs:
@@ -109,11 +109,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Blacklisté: bool
 
 		*Associations:
-		- Un Adhérent est un Utilisateur (hérédité)
-		- Réalise des Prêts (1-0..n)
+		    - Un Adhérent est un Utilisateur (hérédité)
+		    - Réalise des Prêts (1-0..n)
 
 		*Contraintes:
-		- NA
+		    - NA
 
 
 	>Prêts:
@@ -124,19 +124,19 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Sanction: bool
 
 		*Associations:
-		- Concerne un Exemplaire (0..n-1)
+		    - Concerne un Exemplaire (0..n-1)
 
 		*Contraintes:
-		- NA
+		    - NA
 
 
-Classe supplémentaire qui sera gérée directement par l'affichage des données:
+### Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
 	>Vue Exemplaires Disponibles:
 		- Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
 
-Hypothèses complémentaires:
+### Hypothèses complémentaires:
 
 	- NA
 
