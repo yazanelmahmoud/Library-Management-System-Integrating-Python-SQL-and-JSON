@@ -1,3 +1,13 @@
+NDC consignes :
+
+- intro/context/description/de quoi s'agit-il ? objectifs ?
+- liste des objets à gérer dans la BDD
+- liste des propriétés de chaque objets
+- liste des contraintes pour chaque objet + leurs associations
+- liste des héritages
+- liste des utilisateurs avec leur fonction -> ceux qui peuvent modifier, ceux qui peuvent consulter
+- toutes les hypothèses et autres remarques utiles pour la modélisation
+
 
 Introduction :
 
