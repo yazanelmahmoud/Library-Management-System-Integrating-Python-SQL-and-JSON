@@ -1,19 +1,7 @@
-NDC consignes :
+>Introduction :
+	- Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
 
-- intro/context/description/de quoi s'agit-il ? objectifs ?
-- liste des objets à gérer dans la BDD
-- liste des propriétés de chaque objets
-- liste des contraintes pour chaque objet + leurs associations
-- liste des héritages
-- liste des utilisateurs avec leur fonction -> ceux qui peuvent modifier, ceux qui peuvent consulter
-- toutes les hypothèses et autres remarques utiles pour la modélisation
-
-
-Introduction :
-
-Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
-
-Liste des objets:
+>Liste des objets:
 	- Ressources (comprend Films, Musiques, Livres)
 	- Exemplaires
 	- Utilisateurs (comprend les Membres et les Adhérents)
@@ -22,13 +10,13 @@ Liste des objets:
 
 
 
-Héritages:
+>Héritages:
 	- Films, Musiques et Livres héritent des caractéristiques des Ressources
 	- Membres et Adhérents héritent des caractéristiques des Utilisateurs
 	- Ces deux héritages seront exclusifs
 
 
-Liste des classes objets avec propriétés, associations et contraintes:
+>Liste des classes objets avec propriétés, associations et contraintes:
 
 	>Ressources:
 		- Code (clé): int
@@ -138,14 +126,14 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Concerne un Exemplaire (0..n-1)
 
 
-Classe supplémentaire qui sera gérée directement par l'affichage des données:
+>Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
 	>Vue_Exemplaires_Disponibles:
 		Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
 
-Hypothèses complémentaires:
+>Hypothèses complémentaires:
 
 	- 
 
-Un contrôle utilisateur sera en plus ajouté de telle manière à ce que les adhérents aient uniquement accès à des vues des tables alors que les membres peuvent modifier les tables.
+>Un contrôle utilisateur sera en plus ajouté de telle manière à ce que les adhérents aient uniquement accès à des vues des tables alors que les membres peuvent modifier les tables.
