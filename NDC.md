@@ -21,10 +21,10 @@ Liste des classes objets avec propriétés, associations et contraintes:
 	>Ressources:
 		- Code (clé): int
 		- Titre: varchar
-		- Date_apparition: date
+		- Date apparition: date
 		- Editeur: varchar
 		- Genre: varchar
-		- Code_classification: int
+		- Code classification: int
 		- Prix: float
 
 		*Association 
@@ -73,7 +73,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
 	> Collaborateur:
 		- Nom: varchar
 		- Prenom: varchar
-        - Date_naissance: date
+        - Date naissance: date
         - Nationalité: varchar
 
 		*Associations:
@@ -103,8 +103,8 @@ Liste des classes objets avec propriétés, associations et contraintes:
 	>Adhérents:
 		- Tel: varchar
 		- Actuel: bool
-		- Nbre_sanctions: int
-        - Date_fin_suspendu: date
+		- Nbre sanctions: int
+        - Date fin suspension: date
         - Blacklisté: bool
 
 		*Associations:
@@ -116,10 +116,10 @@ Liste des classes objets avec propriétés, associations et contraintes:
 
 
 	>Prêts:
-		- Date_prêt: date
-		- Durée_prêt: int
-        - Date_retour: date
-        - Etat_retour: appartient à {neuf, bon, abîmé, perdu} enumerate
+		- Date prêt: date
+		- Durée prêt: int
+        - Date retour: date
+        - Etat retour: appartient à {neuf, bon, abîmé, perdu} enumerate
         - Sanction: bool
 
 		*Associations:
@@ -128,7 +128,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
 
 Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
-	>Vue_Exemplaires_Disponibles:
+	>Vue Exemplaires Disponibles:
 		Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
 
