@@ -10,7 +10,6 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 	- Prêts
 
 
-
 ### Héritages:
 	- Films, Musiques et Livres héritent des caractéristiques des Ressources
 	- Membres et Adhérents héritent des caractéristiques des Utilisateurs
@@ -92,6 +91,7 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
         - Adresse: varchar
         - Mail: varchar
 
+
 	>Membres:
 		- NA
 
@@ -100,6 +100,7 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 
 		*Contraintes:
 			- NA
+
 
 	>Adhérents:
 		- Tel: varchar
