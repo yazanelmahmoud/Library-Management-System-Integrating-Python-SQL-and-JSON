@@ -30,8 +30,8 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		*Association 
 			- Composé par des Exemplaires (composition)
 
-		*Contraintes:
-            -
+		*Contraintes
+            - NA
 
 
 	>Livres:
@@ -43,7 +43,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
 			- En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
 
 		*Contraintes
-		    - 
+		    - NA
 
 
 	>Films:
@@ -56,7 +56,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
             - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
 
 		*Contraintes
-		    - 
+		    - NA
 
 
 	>Musiques:
@@ -67,7 +67,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
             - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
 
 		*Contraintes
-		    - 
+		    - NA
 
 
 	> Collaborateur:
@@ -76,11 +76,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Date naissance: date
         - Nationalité: varchar
 
-		*Associations:
-			- 
+		*Associations
+			- NA
 			
-		*Contraintes:
-			- 
+		*Contraintes
+			- NA
 		
 
 	>Utilisateurs:
@@ -97,8 +97,8 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		*Associations
 			- Un Membre est un Utilisateur (hérédité)
 
-		*Contraintes:
-			- 
+		*Contraintes
+			- NA
 
 	>Adhérents:
 		- Tel: varchar
@@ -107,12 +107,12 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Date fin suspension: date
         - Blacklisté: bool
 
-		*Associations:
+		*Associations
 			- Un Adhérent est un Utilisateur (hérédité)
 			- Réalise des Prêts (1-0..n)
 
-		*Contraintes:
-			- 
+		*Contraintes
+			- NA
 
 
 	>Prêts:
@@ -122,8 +122,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Etat retour: appartient à {neuf, bon, abîmé, perdu} enumerate
         - Sanction: bool
 
-		*Associations:
-		- Concerne un Exemplaire (0..n-1)
+		*Associations
+			- Concerne un Exemplaire (0..n-1)
+
+		*Contraintes
+			- NA
 
 
 Classe supplémentaire qui sera gérée directement par l'affichage des données:
