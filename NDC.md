@@ -1,7 +1,8 @@
-1. Introduction :
-	Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
+Introduction :
 
-2. Liste des objets:
+Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
+
+Liste des objets:
 	- Ressources (comprend Films, Musiques, Livres)
 	- Exemplaires
 	- Utilisateurs (comprend les Membres et les Adhérents)
@@ -10,7 +11,7 @@
 
 
 
-3. Héritages:
+Héritages:
 	- Films, Musiques et Livres héritent des caractéristiques des Ressources
 	- Membres et Adhérents héritent des caractéristiques des Utilisateurs
 	- Ces deux héritages seront exclusifs
@@ -27,11 +28,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Code classification: int
 		- Prix: float
 
-		*Association 
-			- Composé par des Exemplaires (composition)
+		*Association:
+		- Composé par des Exemplaires (composition)
 
-		*Contraintes
-            - NA
+		*Contraintes:
+        - NA
 
 
 	>Livres:
@@ -39,11 +40,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Résumé: varchar
 		- Langue: varchar
 
-		*Associations
-			- En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
+		*Associations:
+		- En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
 
-		*Contraintes
-		    - NA
+		*Contraintes:
+		- NA
 
 
 	>Films:
@@ -51,23 +52,23 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Synopsis: varchar
         - Durée: int
 
-		*Associations
-		    - En collaboration avec une liste de (Collaborateurs) réalisateurs (*-*)
-            - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
+		*Associations:
+		- En collaboration avec une liste de (Collaborateurs) réalisateurs (*-*)
+        - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
 
-		*Contraintes
-		    - NA
+		*Contraintes:
+		- NA
 
 
 	>Musiques:
 		- Durée: int
 
-		*Associations
-		    - En collaboration avec une liste de (Collaborateurs) compositeurs (*-*)
-            - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
+		*Associations:
+		- En collaboration avec une liste de (Collaborateurs) compositeurs (*-*)
+        - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
 
-		*Contraintes
-		    - NA
+		*Contraintes:
+		- NA
 
 
 	> Collaborateur:
@@ -76,11 +77,11 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Date naissance: date
         - Nationalité: varchar
 
-		*Associations
-			- NA
+		*Associations:
+		- NA
 			
-		*Contraintes
-			- NA
+		*Contraintes:
+		- NA
 		
 
 	>Utilisateurs:
@@ -92,12 +93,12 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Mail: varchar
 
 	>Membres:
-		- 
+		- NA
 
-		*Associations
+		*Associations:
 			- Un Membre est un Utilisateur (hérédité)
 
-		*Contraintes
+		*Contraintes:
 			- NA
 
 	>Adhérents:
@@ -107,12 +108,12 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Date fin suspension: date
         - Blacklisté: bool
 
-		*Associations
-			- Un Adhérent est un Utilisateur (hérédité)
-			- Réalise des Prêts (1-0..n)
+		*Associations:
+		- Un Adhérent est un Utilisateur (hérédité)
+		- Réalise des Prêts (1-0..n)
 
-		*Contraintes
-			- NA
+		*Contraintes:
+		- NA
 
 
 	>Prêts:
@@ -122,21 +123,21 @@ Liste des classes objets avec propriétés, associations et contraintes:
         - Etat retour: appartient à {neuf, bon, abîmé, perdu} enumerate
         - Sanction: bool
 
-		*Associations
-			- Concerne un Exemplaire (0..n-1)
+		*Associations:
+		- Concerne un Exemplaire (0..n-1)
 
-		*Contraintes
-			- NA
+		*Contraintes:
+		- NA
 
 
 Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
 	>Vue Exemplaires Disponibles:
-		Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
+		- Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
 
-6. Hypothèses complémentaires:
+Hypothèses complémentaires:
 
-	- 
+	- NA
 
-7. Un contrôle utilisateur sera en plus ajouté de telle manière à ce que les adhérents aient uniquement accès à des vues des tables alors que les membres peuvent modifier les tables.
+Un contrôle utilisateur sera en plus ajouté de telle manière à ce que les adhérents aient uniquement accès à des vues des tables alors que les membres peuvent modifier les tables.
