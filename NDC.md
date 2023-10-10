@@ -1,5 +1,5 @@
 1. Introduction :
-	_ Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
+	Notre objectif est de créer une base de donnée qui gère les ressources stockées dans une bibliothèque, leurs emprunts et les utilisateurs de la bibliothèque.
 
 2. Liste des objets:
 	- Ressources (comprend Films, Musiques, Livres)
@@ -16,7 +16,7 @@
 	- Ces deux héritages seront exclusifs
 
 
-4. Liste des classes objets avec propriétés, associations et contraintes:
+Liste des classes objets avec propriétés, associations et contraintes:
 
 	>Ressources:
 		- Code (clé): int
