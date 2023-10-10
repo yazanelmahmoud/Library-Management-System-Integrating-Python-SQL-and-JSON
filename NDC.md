@@ -126,7 +126,7 @@ Liste des classes objets avec propriétés, associations et contraintes:
 		- Concerne un Exemplaire (0..n-1)
 
 
-5. Classe supplémentaire qui sera gérée directement par l'affichage des données:
+Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
 	>Vue_Exemplaires_Disponibles:
 		Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
