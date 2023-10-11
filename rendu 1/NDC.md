@@ -6,7 +6,7 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 	- Ressources (comprend Films, Musiques, Livres)
 	- Exemplaires
 	- Utilisateurs (comprend les Membres et les Adhérents)
-	- Collaborateurs
+	- Contributeurs
 	- Prêts
 
 
@@ -40,7 +40,8 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		- Langue: varchar
 
 		*Associations:
-		    - En collaboration avec une liste de (Collaborateurs) auteurs (*-*)
+		    - En collaboration avec une liste de (Contributeurs) auteurs (*-*)
+			- Un Livre est une Ressource (hérédité)
 
 		*Contraintes:
 		    - NA
@@ -52,25 +53,27 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
         - Durée: int
 
 		*Associations:
-		    - En collaboration avec une liste de (Collaborateurs) réalisateurs (*-*)
-            - En collaboration avec une liste de (Collaborateurs) acteurs (*-*)
+		    - En collaboration avec une liste de (Contributeurs) réalisateurs (*-*)
+            - En collaboration avec une liste de (Contributeurs) acteurs (*-*)
+			- Un Film est une Ressource (hérédité)
 
 		*Contraintes:
-		    - NA
+		    - Durée >=0
 
 
 	>Musiques:
 		- Durée: int
 
 		*Associations:
-		    - En collaboration avec une liste de (Collaborateurs) compositeurs (*-*)
-            - En collaboration avec une liste de (Collaborateurs) interprètes (*-*)
+		    - En collaboration avec une liste de (Contributeurs) compositeurs (*-*)
+            - En collaboration avec une liste de (Contributeurs) interprètes (*-*)
+			- Une Musique est une Ressource (hérédité)
 
 		*Contraintes:
-		    - NA
+		    - Durée >=0
 
 
-	> Collaborateur:
+	> Contributeurs:
 		- Nom: varchar
 		- Prenom: varchar
         - Date naissance: date
@@ -80,9 +83,19 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		    - NA
 			
 		*Contraintes:
-		    - NA
+		    - Date naissance < aujourd'hui
 		
 
+	> Exemplaires:
+		- Etat: appartient à {neuf, bon, abîmé, perdu} enumerate
+
+		*Associations:
+		    - NA
+			
+		*Contraintes:
+		    - NA
+
+		
 	>Utilisateurs:
 		- Login (clé): varchar
         - Mdp: varchar
@@ -128,13 +141,15 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		    - Concerne un Exemplaire (0..n-1)
 
 		*Contraintes:
-		    - NA
+		    - Date prêt >= aujourd'hui
+			- Durée prêt >= 0
+			- Date retour >= date prêt
 
 
 ### Classe supplémentaire qui sera gérée directement par l'affichage des données:
 
 	>Vue Exemplaires Disponibles:
-		- Jointure tables Ressources, Exemplaires, Collaborateurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
+		- Jointure tables Ressources, Exemplaires, Contributeurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
 
 ### Hypothèses complémentaires:
