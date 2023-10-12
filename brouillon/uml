@@ -15,7 +15,6 @@ class Bibliothèque {
 class Ressource {
   - id: String
   - titre: String
-  - contributeurs: List<Contributeur>
   - dateApparition: Date
   - editeur: String
   - genre: String
@@ -45,14 +44,24 @@ class Contributeur {
   - nationalite: String
 }
 
+Contributeur "1,n"-- "*" Livre : a écrit
+Contributeur "1,n"-- "*" Musique : a interpreté
+Contributeur "1,n"-- "*" Musique : a composé
+Contributeur "1,n"-- "*" Film : a joué
+Contributeur "1,n"-- "*" Film : a réalisé
+
 class Utilisateur {
-  - login: String
-  - password: String
+  - login: string
+  - password: string
   - prenom: String
   - nom: String
-  - addresse: String
+  - addresse: Adresse
   - email: String
 }
+
+
+
+
 
 class Personnel extends Utilisateur {
   + gestionPrets()
@@ -66,6 +75,7 @@ class Adherent extends Utilisateur {
   + HistoriqueDePrets(): List<Pret>
 }
 
+
 class Adhesion {
   - membre: Membre
   - DateAdhesion: Date
@@ -73,34 +83,30 @@ class Adhesion {
 }
 
 class Exemplaire {
-  - Etat: String
+  - Etat = {Neuf, Bon, Abimé, Perdu} 
 }
+
+
+Exemplaire "1..n" --* Ressource 
 
 class Pret {
   - DatePret: Date
-  - DureePret: Date
   - DateRetour: Date
-  - fineAmount: double
+  - rendu: double
 }
-
-
 
 
 Bibliotheque --|> Ressource
 Bibliotheque --|> Utilisateur
 Bibliotheque -[hidden]-> Adhesion
 
-Ressource --|> Livre
-Ressource --|> Musique
-Ressource --|> Film
-
-Exemplaire --|> Ressource
-Exemplaire --|> Utilisateur
-Exemplaire --|> Pret
+Livre--|> Ressource 
+Musique --|> Ressource 
+Film --|> Ressource 
 
 
 
-Livre --|> Contributeur
-Musique --|> Contributeur
-Film --|> Contributeur
+
+
+
 @enduml
