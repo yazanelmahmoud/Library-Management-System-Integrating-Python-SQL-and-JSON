@@ -4,14 +4,6 @@
 !define User abstract class
 
 
-class Bibliothèque {
-  + search(keyword: String): List<Ressource>
-  + addResource(Ressource: Ressource)
-  + modifyResource(Ressource: Ressource)
-  + addResourceCopy(Ressource: Ressource)
-  + getStatistics(): Map<String, Integer>
-}
-
 class Ressource {
   - id: String
   - titre: String
@@ -70,17 +62,12 @@ class Personnel extends Utilisateur {
 
 class Adherent extends Utilisateur {
   -numeroTelephone: String
-  + PretDocument(exemplaire: exemplaire)
-  + retourDocument(exemplaire: exemplaire)
+  -dateNaissance: Date
+  -statut: {active, expiré,suspendue,blackliste}
   + HistoriqueDePrets(): List<Pret>
 }
 
 
-class Adhesion {
-  - membre: Membre
-  - DateAdhesion: Date
-  - DateExpiration: Date
-}
 
 class Exemplaire {
   - Etat = {Neuf, Bon, Abimé, Perdu} 
@@ -89,16 +76,27 @@ class Exemplaire {
 
 Exemplaire "1..n" --* Ressource 
 
-class Pret {
+class Pret{
   - DatePret: Date
   - DateRetour: Date
   - rendu: double
 }
 
+(Exemplaire, Adherent) . Pret
 
-Bibliotheque --|> Ressource
-Bibliotheque --|> Utilisateur
-Bibliotheque -[hidden]-> Adhesion
+class Sanction{
+    -motif : motif_sanction
+    -date_debut : Date
+    -date_fin : calculer_date_fin
+    + calculer_date_fin()
+    
+    
+}
+
+
+
+Sanction "*" -- "1" Adherent : est_sanctionne
+
 
 Livre--|> Ressource 
 Musique --|> Ressource 
