@@ -81,7 +81,7 @@ class Pret{
   - DateRetour: Date
   - rendu: double
 }
-
+Exemplaire "*" --"*"Adherent
 (Exemplaire, Adherent) . Pret
 
 class Sanction{
