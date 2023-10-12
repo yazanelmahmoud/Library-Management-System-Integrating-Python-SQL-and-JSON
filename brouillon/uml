@@ -4,7 +4,7 @@
 !define User abstract class
 
 
-class Ressource {
+abstract class Ressource {
   - id: String
   - titre: String
   - dateApparition: Date
@@ -42,7 +42,7 @@ Contributeur "1,n"-- "*" Musique : a composé
 Contributeur "1,n"-- "*" Film : a joué
 Contributeur "1,n"-- "*" Film : a réalisé
 
-class Utilisateur {
+abstract class Utilisateur {
   - login: string
   - password: string
   - prenom: String
