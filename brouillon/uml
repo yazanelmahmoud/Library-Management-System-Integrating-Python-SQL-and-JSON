@@ -87,7 +87,7 @@ class Pret{
 class Sanction{
   - DateSanction: Date
   - DateFinSanction: Date
-  - motif: String
+  - motif: {Retard, Deterioration, Perte}
   - montant: double
   + payerSanction()
   + prolongerSanction()
