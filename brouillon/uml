@@ -85,15 +85,14 @@ class Pret{
 (Exemplaire, Adherent) . Pret
 
 class Sanction{
-    -motif : motif_sanction
-    -date_debut : Date
-    -date_fin : calculer_date_fin
-    + calculer_date_fin()
-    
-    
+  - DateSanction: Date
+  - DateFinSanction: Date
+  - motif: String
+  - montant: double
+  + payerSanction()
+  + prolongerSanction()
+  + annulerSanction()
 }
-
-
 
 Sanction "*" -- "1" Adherent : est_sanctionne
 
