@@ -1,0 +1,106 @@
+@startuml
+!theme mars
+!define Resource abstract class
+!define User abstract class
+
+
+class Bibliothèque {
+  + search(keyword: String): List<Ressource>
+  + addResource(Ressource: Ressource)
+  + modifyResource(Ressource: Ressource)
+  + addResourceCopy(Ressource: Ressource)
+  + getStatistics(): Map<String, Integer>
+}
+
+class Ressource {
+  - id: String
+  - titre: String
+  - contributeurs: List<Contributeur>
+  - dateApparition: Date
+  - editeur: String
+  - genre: String
+  - codeClassification: String
+}
+
+class Livre {
+  - ISBN: String
+  - resume: String
+}
+
+class Musique {
+  - langue: String
+  - longueur: int
+}
+
+class Film {
+  - language: String
+  - length: int
+  - synopsis: String
+}
+
+class Contributeur {
+  - prenom: String
+  - nom: String
+  - datedenaissance: Date
+  - nationalite: String
+}
+
+class Utilisateur {
+  - login: String
+  - password: String
+  - prenom: String
+  - nom: String
+  - addresse: String
+  - email: String
+}
+
+class Personnel extends Utilisateur {
+  + gestionPrets()
+  + gestionUtilisateurs()
+}
+
+class Adherent extends Utilisateur {
+  -numeroTelephone: String
+  + PretDocument(exemplaire: exemplaire)
+  + retourDocument(exemplaire: exemplaire)
+  + HistoriqueDePrets(): List<Pret>
+}
+
+class Adhesion {
+  - membre: Membre
+  - DateAdhesion: Date
+  - DateExpiration: Date
+}
+
+class Exemplaire {
+  - Etat: String
+}
+
+class Pret {
+  - DatePret: Date
+  - DureePret: Date
+  - DateRetour: Date
+  - fineAmount: double
+}
+
+
+
+
+Bibliotheque --|> Ressource
+Bibliotheque --|> Utilisateur
+Bibliotheque -[hidden]-> Adhesion
+
+Ressource --|> Livre
+Ressource --|> Musique
+Ressource --|> Film
+
+Exemplaire --|> Ressource
+Exemplaire --|> Utilisateur
+Exemplaire --|> Pret
+
+
+
+Livre --|> Contributeur
+Musique --|> Contributeur
+Film --|> Contributeur
+@enduml
