@@ -4,3 +4,4 @@ Pierre HOURMANT
 Antoine THIAMENY
 Evan DARTOIS
 Gabriel SPORCK TROMBINI
+Yazan El Mahmoud
