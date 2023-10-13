@@ -1,5 +1,4 @@
 @startuml
-!theme mars
 !define Resource abstract class
 !define User abstract class
 
@@ -16,15 +15,15 @@ abstract class Ressource {
 class Livre {
   - ISBN: String
   - resume: String
+  - langue: String
 }
 
 class Musique {
-  - langue: String
   - longueur: int
 }
 
 class Film {
-  - language: String
+  - langue: String
   - length: int
   - synopsis: String
 }
@@ -77,9 +76,10 @@ class Exemplaire {
 Exemplaire "1..n" --* Ressource 
 
 class Pret{
-  - DatePret: Date
-  - DateRetour: Date
-  - rendu: double
+  - datePret: Date
+  - durée : int
+  - dateRetour: Date
+  - etatRetour: {neuf, bon, abîmé, perdu}
 }
 Exemplaire "*" --"*"Adherent
 (Exemplaire, Adherent) . Pret
@@ -100,10 +100,6 @@ Sanction "*" -- "1" Adherent : est_sanctionne
 Livre--|> Ressource 
 Musique --|> Ressource 
 Film --|> Ressource 
-
-
-
-
 
 
 @enduml
