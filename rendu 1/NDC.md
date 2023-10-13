@@ -8,6 +8,7 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 	- Utilisateurs (comprend les Membres et les Adhérents)
 	- Contributeurs
 	- Prêts
+	- Sanctions
 
 
 ### Héritages:
@@ -24,14 +25,10 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		- Date apparition: date
 		- Editeur: varchar
 		- Genre: varchar
-		- Code classification: int
-		- Prix: float
+		- Code classification: varchar
 
 		*Association:
 		    - Composé par des Exemplaires (composition)
-
-		*Contraintes:
-            - NA
 
 
 	>Livres:
@@ -42,9 +39,6 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		*Associations:
 		    - En collaboration avec une liste de (Contributeurs) auteurs (*-*)
 			- Un Livre est une Ressource (hérédité)
-
-		*Contraintes:
-		    - NA
 
 
 	>Films:
@@ -78,9 +72,6 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		- Prenom: varchar
         - Date naissance: date
         - Nationalité: varchar
-
-		*Associations:
-		    - NA
 			
 		*Contraintes:
 		    - Date naissance < aujourd'hui
@@ -88,12 +79,6 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 
 	> Exemplaires:
 		- Etat: appartient à {neuf, bon, abîmé, perdu} enumerate
-
-		*Associations:
-		    - NA
-			
-		*Contraintes:
-		    - NA
 
 		
 	>Utilisateurs:
@@ -106,28 +91,35 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 
 
 	>Membres:
-		- NA
+	    + gestionPrets()
+        + gestionUtilisateurs()
 
 		*Associations:
 			- Un Membre est un Utilisateur (hérédité)
 
-		*Contraintes:
-			- NA
-
 
 	>Adhérents:
 		- Tel: varchar
-		- Actuel: bool
-		- Nbre sanctions: int
-        - Date fin suspension: date
-        - Blacklisté: bool
+		- NumeroTelephone: String
+		- DateNaissance: Date
+		- Statut: {active, expiré,suspendue,blackliste}
+		+ HistoriqueDePrets(): List<Pret>
+
 
 		*Associations:
 		    - Un Adhérent est un Utilisateur (hérédité)
 		    - Réalise des Prêts (1-0..n)
+			- Est sanctionné (1-0..n)
 
-		*Contraintes:
-		    - NA
+
+    >Sanctions:
+		- DateSanction: Date
+		- DateFinSanction: Date
+		- motif: {Retard, Deterioration, Perte}
+		- montant: double
+		+ payerSanction()
+		+ prolongerSanction()
+		+ annulerSanction()
 
 
 	>Prêts:
@@ -135,7 +127,6 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		- Durée prêt: int
         - Date retour: date
         - Etat retour: appartient à {neuf, bon, abîmé, perdu} enumerate
-        - Sanction: bool
 
 		*Associations:
 		    - Concerne un Exemplaire (0..n-1)
@@ -151,9 +142,5 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 	>Vue Exemplaires Disponibles:
 		- Jointure tables Ressources, Exemplaires, Contributeurs, Prêts (conditions: date dernier rendu de l'exemplaire < date du jour ET etat dernier rendu = neuf OU bon)
     
-
-### Hypothèses complémentaires:
-
-	- NA
 
 Un contrôle utilisateur sera en plus ajouté de telle manière à ce que les adhérents aient uniquement accès à des vues des tables alors que les membres peuvent modifier les tables.
