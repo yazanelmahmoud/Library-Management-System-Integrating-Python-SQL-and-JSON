@@ -81,12 +81,18 @@ Notre objectif est de créer une base de donnée qui gère les ressources stock�
 		- Etat: appartient à {neuf, bon, abîmé, perdu} enumerate
 
 		
+	>Adresse <<datatype>>{
+		- Rue: String
+		- Numero: String
+		- CodePostal: String
+		- Ville: String
+}
 	>Utilisateurs:
 		- Login (clé): varchar
         - Mdp: varchar
         - Nom: varchar
         - Prenom: varchar
-        - Adresse: varchar
+        - Adresse: Adresse
         - Mail: varchar
 
 
