@@ -41,6 +41,13 @@ Contributeur "1,n"-- "*" Musique : a composé
 Contributeur "1,n"-- "*" Film : a joué
 Contributeur "1,n"-- "*" Film : a réalisé
 
+enum Adresse <<datatype>>{
+  - Rue: String
+  - Numero: String
+  - CodePostal: String
+  - Ville: String
+}
+
 abstract class Utilisateur {
   - login: string
   - password: string
