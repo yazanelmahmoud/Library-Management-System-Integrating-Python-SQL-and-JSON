@@ -59,6 +59,7 @@ abstract class Utilisateur {
   - password: string
   - prenom: String
   - nom: String
+  - addresse: Adresse
   - email: String
 }
 
@@ -72,7 +73,6 @@ class Personnel extends Utilisateur {
 class Adherent extends Utilisateur {
   - numeroTelephone: String
   - dateNaissance: Date
-  - addresse: Adresse
   - statut: {active, expiré,suspendue,blackliste}
   + nombreSanctions() : int
 }
