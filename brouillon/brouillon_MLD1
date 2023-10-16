@@ -1,1 +1,102 @@
+Table "Ressource":
 
+id: VARCHAR
+titre: VARCHAR
+dateApparition: DATE
+editeur: VARCHAR
+genre: VARCHAR
+codeClassification: VARCHAR
+Table "Livre":
+
+ISBN: VARCHAR
+resume: VARCHAR
+langue: VARCHAR
+Table "Musique":
+
+longueur: INT
+Table "Film":
+
+langue: VARCHAR
+length: INT
+synopsis: VARCHAR
+Table "Contributeur":
+
+prenom: VARCHAR
+nom: VARCHAR
+datedenaissance: DATE
+nationalite: VARCHAR
+Table "Adresse":
+
+Rue: VARCHAR
+Numero: VARCHAR
+CodePostal: VARCHAR
+Ville: VARCHAR
+Table "Utilisateur":
+
+login: VARCHAR
+password: VARCHAR
+prenom: VARCHAR
+nom: VARCHAR
+addresse_Rue: VARCHAR (foreign key to Adresse.Rue)
+addresse_Numero: VARCHAR (foreign key to Adresse.Numero)
+addresse_CodePostal: VARCHAR (foreign key to Adresse.CodePostal)
+addresse_Ville: VARCHAR (foreign key to Adresse.Ville)
+email: VARCHAR
+Table "Personnel":
+
+login: VARCHAR (foreign key to Utilisateur.login)
+password: VARCHAR (foreign key to Utilisateur.password)
+prenom: VARCHAR (foreign key to Utilisateur.prenom)
+nom: VARCHAR (foreign key to Utilisateur.nom)
+addresse_Rue: VARCHAR (foreign key to Utilisateur.addresse_Rue)
+addresse_Numero: VARCHAR (foreign key to Utilisateur.addresse_Numero)
+addresse_CodePostal: VARCHAR (foreign key to Utilisateur.addresse_CodePostal)
+addresse_Ville: VARCHAR (foreign key to Utilisateur.addresse_Ville)
+Table "Adherent":
+
+login: VARCHAR (foreign key to Utilisateur.login)
+password: VARCHAR (foreign key to Utilisateur.password)
+prenom: VARCHAR (foreign key to Utilisateur.prenom)
+nom: VARCHAR (foreign key to Utilisateur.nom)
+addresse_Rue: VARCHAR (foreign key to Utilisateur.addresse_Rue)
+addresse_Numero: VARCHAR (foreign key to Utilisateur.addresse_Numero)
+addresse_CodePostal: VARCHAR (foreign key to Utilisateur.addresse_CodePostal)
+addresse_Ville: VARCHAR (foreign key to Utilisateur.addresse_Ville)
+numeroTelephone: VARCHAR
+dateNaissance: DATE
+statut: ENUM ('active', 'expiré', 'suspendue', 'blacklisté')
+Table "Exemplaire":
+
+id: INT
+Etat: ENUM ('Neuf', 'Bon', 'Abimé', 'Perdu')
+Ressource_id: VARCHAR (foreign key to Ressource.id)
+Table "Pret":
+
+datePret: DATE
+durée: INT
+dateRetour: DATE
+etatRetour: ENUM ('neuf', 'bon', 'abîmé', 'perdu')
+Exemplaire_id: INT (foreign key to Exemplaire.id)
+Adherent_login: VARCHAR (foreign key to Adherent.login)
+Table "Sanction":
+
+DateSanction: DATE
+DateFinSanction: DATE
+motif: ENUM ('Retard', 'Détérioration', 'Perte')
+montant: DOUBLE
+Adherent_login: VARCHAR (foreign key to Adherent.login)
+Table "Ressource_Livre":
+
+Ressource_id: VARCHAR (foreign key to Ressource.id)
+Livre_ISBN: VARCHAR (foreign key to Livre.ISBN)
+Table "Ressource_Musique":
+
+Ressource_id: VARCHAR (foreign key to Ressource.id)
+Musique_id: INT (foreign key to Musique.id)
+Table "Ressource_Film":
+
+Ressource_id: VARCHAR (foreign key to Ressource.id)
+Film_id: INT (foreign key to Film.id)
+Note: Les tables "Ressource_Livre", "Ressource_Musique" et "Ressource_Film" sont des tables de jointure pour la relation d'héritage entre les ressources et leurs sous-classes.
+
+Ce modèle logique des données représente les entités, les attributs et les relations du système conformément au diagramme UML fourni.
