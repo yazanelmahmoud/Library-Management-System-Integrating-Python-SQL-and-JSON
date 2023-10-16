@@ -1,0 +1,120 @@
+Ressource
+(#id: VARCHAR,
+titre: VARCHAR,
+dateApparition: DATE,
+editeur: VARCHAR,
+genre: VARCHAR,
+codeClassification: VARCHAR
+)
+
+Livre
+(#id_livre ->Ressource(id),
+ISBN: VARCHAR, 
+resume: VARCHAR,
+langue: VARCHAR
+) avec ISBN UNIQUE NON NULL
+
+Musique
+(#id_musique ->Ressource(id),
+longueur: INT
+) avec longueur NON NULL
+
+Film
+(#id_film ->Ressource(id),
+langue: VARCHAR,
+length: INT,
+synopsis: VARCHAR
+) avec length NON NULL
+
+Contributeur
+(#id : INT,
+prenom: VARCHAR,
+nom: VARCHAR,
+datedenaissance: DATE,
+nationalite: VARCHAR
+)
+
+Auteur
+(#id_livre ->Livre(id),
+#id_contributeur -> Contributeur(id)
+) Contrainte : Projection(A_ecrit, id_livre)) IN  Projection(Livre, id)) 
+
+
+
+
+Interprete
+(#id_musique->Musique(id_musique),
+#id_contributeur -> Contributeur(id)
+) Contrainte : Projection(A_interpreté, id_musique)) IN  Projection(Musique, id_musique))
+
+Compositeur
+(#id_musique->Musique(id_musique),
+#id_contributeur -> Contributeur(id)
+) Contrainte : Projection(A_composé, id_musique)) IN  Projection(Musique, id_musique))
+
+Acteur
+(#id_film ->Film(id),
+#id_contributeur -> Contributeur(id)
+) Contrainte : Projection(A_joué, id_film)) IN  Projection(Film, id_film))
+
+Réalisateur
+(#id_film ->Film(id),
+#id_contributeur -> Contributeur(id)
+) Contrainte : Projection(A_réalisé, id_film)) IN  Projection(Film, id_film))
+
+Exemplaire
+(#id_exemplaire ->Ressource(id),
+Etat: ENUM ('Neuf', 'Bon', 'Abimé', 'Perdu'),
+Disponible : Bool
+)
+
+
+<<datatype>> Adresse
+(Rue: VARCHAR,
+Numero: VARCHAR,
+CodePostal: VARCHAR,
+Ville: VARCHAR
+)
+
+Utilisateur
+(
+#id : INT
+login: VARCHAR,
+password: VARCHAR,
+prenom: VARCHAR,
+adresse : Adresse,
+nom: VARCHAR,
+email: VARCHAR
+)
+
+
+Personnel
+(#id_personnel -> utilisateur
+)
+
+Adherent
+(#id_adherent -> Utilisateur(id),
+numeroTelephone: VARCHAR,
+dateNaissance: DATE,
+statut: {'active', 'expiré', 'suspendue', 'blacklisté'}
+)
+
+Pret
+(#id_exemplaire -> Exemplaire(id_exemplaire),
+#Id_adherent -> Adherent(id_adherent),
+datePret: DATE,
+durée: INT,
+dateRetour: DATE,
+etatRetour: ENUM ('neuf', 'bon', 'abîmé', 'perdu'),
+id_responsable -> Personnel(id_personnel) avec id_personnel UNIQUE NON NULL
+)
+
+
+Sanction
+(#id_sanction: INT,
+DateSanction: DATE,
+DateFinSanction: DATE,
+motif: ENUM ('Retard', 'Détérioration', 'Perte'),
+montant: DOUBLE,
+Id_sanctionne -> Adherent(id_adherent) UNIQUE NON NULL
+)
