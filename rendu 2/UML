@@ -1,0 +1,112 @@
+@startuml
+!define Resource abstract class
+!define User abstract class
+
+
+abstract class Ressource {
+  - id: String
+  - titre: String
+  - dateApparition: Date
+  - editeur: String
+  - genre: String
+  - codeClassification: String
+}
+
+class Livre {
+  - ISBN: String
+  - resume: String
+  - langue: String
+}
+
+class Musique {
+  - longueur: int
+}
+
+class Film {
+  - langue: String
+  - length: int
+  - synopsis: String
+}
+
+class Contributeur {
+  - prenom: String
+  - nom: String
+  - datedenaissance: Date
+  - nationalite: String
+}
+
+Contributeur "1,n"-- "*" Livre : a écrit
+Contributeur "1,n"-- "*" Musique : a interpreté
+Contributeur "1,n"-- "*" Musique : a composé
+Contributeur "1,n"-- "*" Film : a joué
+Contributeur "1,n"-- "*" Film : a réalisé
+
+enum Adresse <<datatype>>{
+  - Rue: String
+  - Numero: String
+  - CodePostal: String
+  - Ville: String
+}
+
+abstract class Utilisateur {
+  - login: string
+  - password: string
+  - prenom: String
+  - nom: String
+  - addresse: Adresse
+  - email: String
+}
+
+
+
+
+
+class Personnel extends Utilisateur {
+  + gestionPrets()
+  + gestionUtilisateurs()
+}
+
+class Adherent extends Utilisateur {
+  -numeroTelephone: String
+  -dateNaissance: Date
+  -statut: {active, expiré,suspendue,blackliste}
+  + HistoriqueDePrets(): List<Pret>
+}
+
+
+
+class Exemplaire {
+  - Etat = {Neuf, Bon, Abimé, Perdu} 
+}
+
+
+Exemplaire "1..n" --* Ressource 
+
+class Pret{
+  - datePret: Date
+  - durée : int
+  - dateRetour: Date
+  - etatRetour: {neuf, bon, abîmé, perdu}
+}
+Exemplaire "*" --"*"Adherent
+(Exemplaire, Adherent) . Pret
+
+class Sanction{
+  - DateSanction: Date
+  - DateFinSanction: Date
+  - motif: {Retard, Deterioration, Perte}
+  - montant: double
+  + payerSanction()
+  + prolongerSanction()
+  + annulerSanction()
+}
+
+Sanction "*" -- "1" Adherent : est_sanctionne
+
+
+Livre--|> Ressource 
+Musique --|> Ressource 
+Film --|> Ressource 
+
+
+@enduml
