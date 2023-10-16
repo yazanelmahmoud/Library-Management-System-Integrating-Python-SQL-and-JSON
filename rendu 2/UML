@@ -4,16 +4,17 @@
 
 
 abstract class Ressource {
-  - id: String
+  # id: String
   - titre: String
   - dateApparition: Date
   - editeur: String
   - genre: String
   - codeClassification: String
+  - duréeMaxPrêt : int
 }
 
 class Livre {
-  - ISBN: String
+  # ISBN: String
   - resume: String
   - langue: String
 }
@@ -35,13 +36,18 @@ class Contributeur {
   - nationalite: String
 }
 
-Contributeur "1,n"-- "*" Livre : a écrit
-Contributeur "1,n"-- "*" Musique : a interpreté
-Contributeur "1,n"-- "*" Musique : a composé
-Contributeur "1,n"-- "*" Film : a joué
-Contributeur "1,n"-- "*" Film : a réalisé
+Contributeur "1,n"-- "*" Livre
+(Contributeur, Livre) . Auteur
+Contributeur "1,n"-- "*" Musique
+(Contributeur, Musique) . Compositeur
+Contributeur "1,n"-- "*" Musique
+(Contributeur, Musique) . Interprète
+Contributeur "1,n"-- "*" Film
+(Contributeur, Film) . Acteur
+Contributeur "1,n"-- "*" Film
+(Contributeur, Film) . Réalisateur
 
-enum Adresse <<datatype>>{
+class Adresse <<datatype>>{
   - Rue: String
   - Numero: String
   - CodePostal: String
@@ -49,11 +55,10 @@ enum Adresse <<datatype>>{
 }
 
 abstract class Utilisateur {
-  - login: string
+  # login: string
   - password: string
   - prenom: String
   - nom: String
-  - addresse: Adresse
   - email: String
 }
 
@@ -62,21 +67,21 @@ abstract class Utilisateur {
 
 
 class Personnel extends Utilisateur {
-  + gestionPrets()
-  + gestionUtilisateurs()
 }
 
 class Adherent extends Utilisateur {
-  -numeroTelephone: String
-  -dateNaissance: Date
-  -statut: {active, expiré,suspendue,blackliste}
-  + HistoriqueDePrets(): List<Pret>
+  - numeroTelephone: String
+  - dateNaissance: Date
+  - addresse: Adresse
+  - statut: {active, expiré,suspendue,blackliste}
+  + nombreSanctions() : int
 }
 
 
 
 class Exemplaire {
   - Etat = {Neuf, Bon, Abimé, Perdu} 
+  - disponible : bool
 }
 
 
@@ -84,21 +89,21 @@ Exemplaire "1..n" --* Ressource
 
 class Pret{
   - datePret: Date
-  - durée : int
   - dateRetour: Date
   - etatRetour: {neuf, bon, abîmé, perdu}
+  + retard() : bool
+  + duréePrêt() : int
 }
 Exemplaire "*" --"*"Adherent
 (Exemplaire, Adherent) . Pret
+Pret "*" --"1" Personnel : est_responsable
 
 class Sanction{
   - DateSanction: Date
   - DateFinSanction: Date
   - motif: {Retard, Deterioration, Perte}
   - montant: double
-  + payerSanction()
-  + prolongerSanction()
-  + annulerSanction()
+  - payé : bool
 }
 
 Sanction "*" -- "1" Adherent : est_sanctionne
@@ -106,7 +111,5 @@ Sanction "*" -- "1" Adherent : est_sanctionne
 
 Livre--|> Ressource 
 Musique --|> Ressource 
-Film --|> Ressource 
-
-
+Film --|> Ressource
 @enduml
