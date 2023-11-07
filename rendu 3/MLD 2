@@ -118,3 +118,102 @@ motif: ENUM ('Retard', 'Détérioration', 'Perte'),
 montant: DOUBLE,
 Id_sanctionne -> Adherent(id_adherent) UNIQUE NON NULL
 )
+
+Vue_LivreDetails
+(#id_livre: VARCHAR,
+Ressource.titre: VARCHAR,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Livre.ISBN: VARCHAR,
+Livre.resume: VARCHAR,
+Livre.langue: VARCHAR
+)
+
+Vue_LivreExemplaires
+(#id_livre: VARCHAR,
+Ressource.titre: VARCHAR,
+Exemplaire.etat: ENUM ('Neuf', 'Bon', 'Abimé', 'Perdu'),
+Exemplaire.disponible: BOOLEAN,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Livre.ISBN: VARCHAR,
+Livre.resume: VARCHAR,
+Livre.langue: VARCHAR
+)
+
+Vue_MusiqueDetails
+(#id_musique: VARCHAR,
+Ressource.titre: VARCHAR,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Musique.longueur: INT
+)
+
+Vue_MusiqueExemplaires
+(#id_musique: VARCHAR,
+Ressource.titre: VARCHAR,
+Exemplaire.etat: ENUM ('Neuf', 'Bon', 'Abimé', 'Perdu'),
+Exemplaire.disponible: BOOLEAN,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Musique.longueur: INT
+)
+
+Vue_FilmDetails
+(#id_film: VARCHAR,
+Ressource.titre: VARCHAR,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Film.synopsis: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Film.length: INT,
+Film.langue: VARCHAR
+)
+
+Vue_FilmExemplaires
+(#id_film: VARCHAR,
+Ressource.titre: VARCHAR,
+Exemplaire.etat: ENUM ('Neuf', 'Bon', 'Abimé', 'Perdu'),
+Exemplaire.disponible: BOOLEAN,
+Ressource.dateApparition: DATE,
+Ressource.editeur: VARCHAR,
+Ressource.genre: VARCHAR,
+Film.synopsis: VARCHAR,
+Ressource.codeClassification: VARCHAR,
+Film.length: INT,
+Film.langue: VARCHAR
+)
+
+Vue_PretDetails
+(
+    #id: INT,
+    Pret.datePret : DATE,
+    Pret.duree, : INT
+    Pret.dateRetour : DATE,
+    Pret.etatRetour : ENUM,
+    Adherent.numeroTelephone : VARCHAR,
+    Adherent.dateNaissance : DATE,
+    Adherent.statut : VARCHAR,
+    Utilisateur.login : VARCHAR,
+    Utilisateur.prenom : VARCHAR,
+    Utilisateur.nom : VARCHAR,
+    Utilisateur.email : VARCHAR,
+    Utilisateur.adresse : Adresse,
+    Exemplaire.Etat : VARCHAR,
+    Exemplaire.Disponible : BOOLEAN,
+    Ressource.titre : VARCHAR,
+    Ressource.dateApparition : DATE,
+    Ressource.editeur : VARCHAR,
+    Ressource.genre : VARCHAR,
+    Ressource.codeClassification : VARCHAR
+)
+
