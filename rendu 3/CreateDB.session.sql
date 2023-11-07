@@ -231,7 +231,35 @@ FROM Film F
 JOIN Ressource R ON F.id_film = R.id
 JOIN Exemplaire E ON E.id_ressource = R.id;
 
-CREATE VIEW PrêtExemplaire AS
+CREATE VIEW PretDetails AS
+SELECT
+    P.id,
+    P.datePret,
+    P.duree,
+    P.dateRetour,
+    P.etatRetour,
+    A.numeroTelephone,
+    A.dateNaissance,
+    A.statut,
+    U.login,
+    U.prenom,
+    U.nom,
+    U.email,
+    U.adresse,
+    E.etat,
+    E.disponible,
+    R.titre,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification
+FROM Pret P
+JOIN Adherent A ON P.id_adherent = A.id
+JOIN Utilisateur U ON A.id = U.id
+JOIN Exemplaire E ON P.id_exemplaire = E.id
+JOIN Ressource R ON E.id_ressource = R.id;
+
+CREATE VIEW PretExemplaire AS
 SELECT
     P.id,
     P.id_exemplaire,
@@ -243,4 +271,3 @@ SELECT
 FROM Pret P
 JOIN Exemplaire E ON E.id = P.id_exemplaire
 JOIN Adherent A ON A.id = P.id_adherent;
-
