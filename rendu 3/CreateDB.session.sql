@@ -230,3 +230,17 @@ SELECT
 FROM Film F
 JOIN Ressource R ON F.id_film = R.id
 JOIN Exemplaire E ON E.id_ressource = R.id;
+
+CREATE VIEW PrêtExemplaire AS
+SELECT
+    P.id,
+    P.id_exemplaire,
+    P.id_adherent,
+    E.disponible,
+    P.datePret,
+    P.dateRetour,
+    P.etatRetour
+FROM Pret P
+JOIN Exemplaire E ON E.id = P.id_exemplaire
+JOIN Adherent A ON A.id = P.id_adherent;
+
