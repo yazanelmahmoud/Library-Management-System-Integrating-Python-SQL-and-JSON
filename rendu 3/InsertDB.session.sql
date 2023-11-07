@@ -1,8 +1,9 @@
 INSERT INTO Ressource (id, titre, dateApparition, editeur, genre, codeClassification)
 VALUES
     (1, 'Book 1', '2023-01-01', 'Publisher A', 'Fiction', 101),
-    (2, 'Music 1', '2023-02-01', 'Music Label A', 'Pop', 102),
-    (3, 'Film 1', '2023-03-01', 'Studio A', 'Action', 103);
+    (2, 'Book 2', '2023-01-01', 'Publisher A', 'Fiction', 102),
+    (3, 'Music 1', '2023-02-01', 'Music Label A', 'Pop', 103),
+    (4, 'Film 1', '2023-03-01', 'Studio A', 'Action', 104);
 
 INSERT INTO Livre (id_livre, ISBN, resume, langue)
 VALUES
@@ -11,13 +12,11 @@ VALUES
 
 INSERT INTO Musique (id_musique, longueur)
 VALUES
-    (1, 180),
-    (2, 240);
+    (3, 180);
 
 INSERT INTO Film (id_film, langue, length, synopsis)
 VALUES
-    (1, 'English', 120, 'Film 1 Synopsis'),
-    (2, 'French', 150, 'Film 2 Synopsis');
+    (4, 'English', 120, 'Film 1 Synopsis');
 
 INSERT INTO Contributeur (id, prenom, nom, dateNaissance, nationalite)
 VALUES
@@ -31,29 +30,31 @@ VALUES
 
 INSERT INTO Interprete (id_musique, id_contributeur)
 VALUES
-    (1, 2),
-    (2, 1);
+    (3, 2),
+    (3, 1);
 
 INSERT INTO Compositeur (id_musique, id_contributeur)
 VALUES
-    (1, 1),
-    (2, 2);
+    (3, 2),
+    (3, 1);
 
 INSERT INTO Acteur (id_film, id_contributeur)
 VALUES
-    (1, 1),
-    (2, 2);
+    (4, 2),
+    (4, 1);
 
 INSERT INTO Realisateur (id_film, id_contributeur)
 VALUES
-    (1, 2),
-    (2, 1);
+    (4, 2),
+    (4, 1);
 
-INSERT INTO Exemplaire (id, etat, disponible)
+INSERT INTO Exemplaire (id, id_ressource, etat, disponible)
 VALUES
-    (1, 'Neuf', true),
-    (2, 'Bon', true),
-    (3, 'Abimé', false);
+    (1, 1, 'Neuf', true),
+    (2, 1,'Bon', true),
+    (3, 2,'Bon', false),
+    (4, 3,'Abimé', false),
+    (5, 4,'Bon', false);
 
 INSERT INTO Adresse (id, rue, numero, codePostal, ville)
 VALUES

@@ -79,9 +79,10 @@ CREATE TABLE IF NOT EXISTS Realisateur (
 
 CREATE TABLE IF NOT EXISTS Exemplaire (
     id INT PRIMARY KEY,
+    id_ressource INT,
     etat VARCHAR(20) CHECK (etat IN ('Neuf', 'Bon', 'Abimé', 'Perdu')),
     disponible BOOLEAN,
-    FOREIGN KEY (id) REFERENCES Ressource(id)
+    FOREIGN KEY (id_ressource) REFERENCES Ressource(id)
 );
 
 CREATE TABLE IF NOT EXISTS Adresse (
@@ -140,6 +141,51 @@ CREATE TABLE IF NOT EXISTS Sanction (
    montant FLOAT,
    FOREIGN KEY (id_sanction) REFERENCES Adherent(id)
 );
+
+CREATE VIEW LivreDetails AS
+SELECT
+    L.id_livre,
+    R.titre AS titre_livre,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification,
+    L.ISBN,
+    L.resume,
+    L.langue,
+    C.prenom,
+    C.nom,
+    C.dateNaissance AS auteur_date_naissance,
+    C.nationalite AS auteur_nationalite
+FROM Livre L
+JOIN Ressource R ON L.id_livre = R.id
+JOIN Auteur A ON L.id_livre = A.id_livre
+JOIN Contributeur C ON A.id_contributeur = C.id;
+
+CREATE VIEW LivreExemplaires AS
+SELECT
+    L.id_livre,
+    R.titre AS titre_livre,
+    R.etat,
+    R.disponible,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification,
+    L.ISBN,
+    L.resume,
+    L.langue,
+    C.prenom,
+    C.nom,
+    C.dateNaissance AS auteur_date_naissance,
+    C.nationalite AS auteur_nationalite
+FROM Livre L
+JOIN Ressource R ON L.id_livre = R.id
+JOIN Auteur A ON L.id_livre = A.id_livre
+JOIN Exemplaire E ON E.id_ressource = R.id
+JOIN Contributeur C ON A.id_contributeur = C.id;
+
+
 
 
 
