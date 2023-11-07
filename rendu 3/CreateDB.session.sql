@@ -152,40 +152,81 @@ SELECT
     R.codeClassification,
     L.ISBN,
     L.resume,
-    L.langue,
-    C.prenom,
-    C.nom,
-    C.dateNaissance AS auteur_date_naissance,
-    C.nationalite AS auteur_nationalite
+    L.langue
 FROM Livre L
-JOIN Ressource R ON L.id_livre = R.id
-JOIN Auteur A ON L.id_livre = A.id_livre
-JOIN Contributeur C ON A.id_contributeur = C.id;
+JOIN Ressource R ON L.id_livre = R.id;
 
 CREATE VIEW LivreExemplaires AS
 SELECT
     L.id_livre,
     R.titre AS titre_livre,
-    R.etat,
-    R.disponible,
+    E.etat,
+    E.disponible,
     R.dateApparition,
     R.editeur,
     R.genre,
     R.codeClassification,
     L.ISBN,
     L.resume,
-    L.langue,
-    C.prenom,
-    C.nom,
-    C.dateNaissance AS auteur_date_naissance,
-    C.nationalite AS auteur_nationalite
+    L.langue
 FROM Livre L
 JOIN Ressource R ON L.id_livre = R.id
-JOIN Auteur A ON L.id_livre = A.id_livre
-JOIN Exemplaire E ON E.id_ressource = R.id
-JOIN Contributeur C ON A.id_contributeur = C.id;
+JOIN Exemplaire E ON E.id_ressource = R.id;
 
+CREATE VIEW MusiqueDetails AS
+SELECT
+    M.id_musique,
+    R.titre AS titre_musique,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification,
+    M.longueur
+FROM Musique M
+JOIN Ressource R ON M.id_musique = R.id;
 
+CREATE VIEW MusiqueExemplaires AS
+SELECT
+    M.id_musique,
+    R.titre AS titre_musique,
+    E.etat,
+    E.disponible,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification,
+    M.longueur
+FROM Musique M
+JOIN Ressource R ON M.id_musique = R.id
+JOIN Exemplaire E ON E.id_ressource = R.id;
 
+CREATE VIEW FilmDetails AS
+SELECT
+    F.id_film,
+    R.titre AS titre_film,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    F.synopsis,
+    R.codeClassification,
+    F.length,
+    F.langue
+FROM Film F
+JOIN Ressource R ON F.id_film = R.id;
 
-
+CREATE VIEW FilmExemplaires AS
+SELECT
+    F.id_film,
+    R.titre AS titre_film,
+    E.etat,
+    E.disponible,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    F.synopsis,
+    R.codeClassification,
+    F.length,
+    F.langue
+FROM Film F
+JOIN Ressource R ON F.id_film = R.id
+JOIN Exemplaire E ON E.id_ressource = R.id;
