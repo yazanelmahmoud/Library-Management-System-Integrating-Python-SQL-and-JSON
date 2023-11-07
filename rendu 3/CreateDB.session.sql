@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS Ressource (
     dateApparition DATE,
     editeur VARCHAR(100),
     genre VARCHAR(100),
-    codeClassification INT,
+    codeClassification INT
 );
 
 CREATE TABLE IF NOT EXISTS Livre (
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS Contributeur (
     prenom VARCHAR(100),
     nom VARCHAR(100),
     dateNaissance DATE,
-    nationalite VARCHAR(50),
+    nationalite VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS Auteur (
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS Adresse (
     rue VARCHAR(100),
     numero INT,
     codePostal INT,
-    ville VARCHAR(100),
+    ville VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS Utilisateur (
