@@ -259,15 +259,4 @@ JOIN Utilisateur U ON A.id = U.id
 JOIN Exemplaire E ON P.id_exemplaire = E.id
 JOIN Ressource R ON E.id_ressource = R.id;
 
-CREATE VIEW PretExemplaire AS
-SELECT
-    P.id,
-    P.id_exemplaire,
-    P.id_adherent,
-    E.disponible,
-    P.datePret,
-    P.dateRetour,
-    P.etatRetour
-FROM Pret P
-JOIN Exemplaire E ON E.id = P.id_exemplaire
-JOIN Adherent A ON A.id = P.id_adherent;
+
