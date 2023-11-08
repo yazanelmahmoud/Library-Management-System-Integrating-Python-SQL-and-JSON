@@ -217,3 +217,50 @@ Vue_PretDetails
     Ressource.codeClassification : VARCHAR
 )
 
+Justification des Transformations par référence :
+
+Intégrité des données : En choisissant la transformation par référence, on assure que les données de la base de données restent cohérentes et conformes aux règles de l'application.
+
+Faciliter les requêtes complexes : En reliant les tables par des clés étrangères, on simplifie les requêtes qui nécessitent des informations de plusieurs entités. 
+
+Héritage par référence de "Livre" et "Film" à partir de "Ressource" :
+
+Justification : L'utilisation de l'héritage par référence est privilégiée lorsque des entités partagent des attributs communs avec une autre entité. Dans le cas de "Livre" et "Film," ils partagent des attributs de base avec la table "Ressource" tels que le titre, la date d'apparition, l'éditeur, le genre et le code de classification. L'héritage par référence permet de lier ces deux entités à "Ressource" tout en conservant ces attributs communs dans une seule table. Cela simplifie la structure de la base de données et évite la duplication inutile de données. De plus, cela permet d'ajouter d'autres types de ressources sans avoir à créer de nouvelles tables.
+
+Héritage par référence d'"Adherent" et "Personnel" à partir de "Utilisateur" :
+
+Justification : L'héritage par référence est également pertinent pour "Adherent" et "Personnel" qui partagent des caractéristiques communes avec "Utilisateur" telles que le login, le mot de passe, le prénom, le nom, l'adresse et l'adresse e-mail. En utilisant l'héritage par référence, ces entités héritent des attributs communs de "Utilisateur" sans nécessiter la duplication des colonnes. Cela facilite la maintenance, la gestion et la cohérence des données des utilisateurs. De plus, cela permet de gérer les adhérents et le personnel de la bibliothèque de manière centralisée.
+
+
+Afin de faciliter l'accès à la BDD, nous avons créer des vues, notament les suivantes : 
+
+Vue_LivreDetails :
+
+Justification : Cette vue est utile pour présenter en détail les informations spécifiques aux livres, telles que le titre, l'éditeur, la date d'apparition, le genre, le code de classification, l'ISBN, le résumé et la langue. Cela permet aux utilisateurs de voir toutes les informations essentielles concernant un livre en un seul coup d'œil, ce qui facilite la recherche et la sélection de livres.
+
+Vue_LivreExemplaires :
+
+Justification : Cette vue est importante pour les utilisateurs qui souhaitent savoir quels exemplaires de livres sont disponibles à la bibliothèque. Elle inclut des détails sur l'état de chaque exemplaire (neuf, bon, abîmé, perdu), ainsi que l'indication de leur disponibilité. Cela permet aux utilisateurs de voir rapidement quels exemplaires de livres ils peuvent emprunter.
+
+Vue_MusiqueDetails :
+
+Justification : Cette vue est conçue pour présenter de manière détaillée les informations spécifiques aux œuvres musicales, notamment le titre, l'éditeur, la date d'apparition, le genre, le code de classification et la longueur de la musique. Cela permet aux utilisateurs de mieux comprendre les détails des enregistrements musicaux.
+
+Vue_MusiqueExemplaires :
+
+Justification : Cette vue est essentielle pour les utilisateurs qui souhaitent connaître la disponibilité des exemplaires d'œuvres musicales. Elle indique l'état de chaque exemplaire (neuf, bon, abîmé, perdu) ainsi que leur disponibilité. Cela facilite la sélection et la réservation de musique par les adhérents.
+
+Vue_FilmDetails :
+
+Justification : Cette vue est utilisée pour présenter en détail les informations spécifiques aux films, notamment le titre, l'éditeur, la date d'apparition, le genre, le synopsis, le code de classification, la longueur du film et la langue. Elle permet aux utilisateurs de trouver des informations complètes sur les films.
+
+Vue_FilmExemplaires :
+
+Justification : Cette vue est utile pour les utilisateurs qui recherchent des exemplaires de films disponibles à la bibliothèque. Elle indique l'état de chaque exemplaire (neuf, bon, abîmé, perdu) ainsi que leur disponibilité. Cela facilite la sélection et la réservation de films.
+
+Vue_PretDetails :
+
+Justification : Cette vue rassemble les informations concernant les prêts, les adhérents, les exemplaires et les ressources empruntées. Elle fournit une vue d'ensemble des prêts actuels, y compris la date de prêt, la durée, la date de retour, l'état de retour, les coordonnées de l'adhérent, les informations sur l'utilisateur et les détails de la ressource empruntée. Cela simplifie la gestion des prêts et la communication avec les adhérents.
+
+
+
