@@ -153,13 +153,13 @@ def is_personnel(login):
 def get_sanctions(login):
     query = f"""
             SELECT * FROM SanctionDetails
-            WHERE  = '{login}'
+            WHERE login = '{login}'
     """
     results = execute_query("bibliotheque", query)
     return results
 
 def main():
-    create_tables("bibliotheque")
+    # create_tables("bibliotheque")
     print("Bienvenue à la bibliothèque")
     print("Prêts user1")
     for pret in get_prets_from_login("user1"):
@@ -196,5 +196,8 @@ def main():
         print(pret)
     print("Personnel détails")
     for pret in get_personnel_details("user1"):
+        print(pret)
+    print("Sanctions détails")
+    for pret in get_sanctions("user2"):
         print(pret)
 main()

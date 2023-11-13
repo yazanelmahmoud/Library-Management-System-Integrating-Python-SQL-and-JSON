@@ -292,7 +292,7 @@ FROM Adherent P
 JOIN Utilisateur U ON P.id = U.id
 JOIN Adresse A ON A.id = U.adresse;
 
-CREATE VIEW SanctionsDetails AS
+CREATE VIEW SanctionDetails AS
 SELECT
     U.login,
     S.id_sanction,
