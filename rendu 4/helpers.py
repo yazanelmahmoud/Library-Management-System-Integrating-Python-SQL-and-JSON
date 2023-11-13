@@ -158,6 +158,13 @@ def get_sanctions(login):
     results = execute_query("bibliotheque", query)
     return results
 
+def get_all_sanctions():
+    query = f"""
+            SELECT * FROM SanctionDetails
+    """
+    results = execute_query("bibliotheque", query)
+    return results
+
 def main():
     # create_tables("bibliotheque")
     print("Bienvenue à la bibliothèque")
@@ -197,7 +204,10 @@ def main():
     print("Personnel détails")
     for pret in get_personnel_details("user1"):
         print(pret)
-    print("Sanctions détails")
+    print("Sanctions détails user2")
     for pret in get_sanctions("user2"):
+        print(pret)
+    print("All Sanctions détails")
+    for pret in get_all_sanctions():
         print(pret)
 main()
