@@ -94,12 +94,12 @@ def option_6(conn):
 def afficher_menu():
     print("\n=============== Menu ===============")
     print("1. Recherche Livre / Musique / Film")
-    print("2. Ajouter un Livre / Musique / Film")
-    print("3. Gérer les prêts")
-    print("4. Gérer les sanctions")
-    print("5. Gérer les utilisateurs")
-    print("6. Créer une nouvelle table (BONUS)")
-    print("7. Visualiser les tables (BONUS)")
+    print("2. Ajouter Livre / Musique / Film")
+    print("3. Gérer les prêts (à implémenter)")
+    print("4. Gérer les sanctions (à implémenter)")
+    print("5. Gérer les utilisateurs (à implémenter)")
+    print("6. Créer une nouvelle table (à implémenter)")
+    print("7. Visualiser les tables (à implémenter)")
     print("8. Quitter")
     print("===============================")
 

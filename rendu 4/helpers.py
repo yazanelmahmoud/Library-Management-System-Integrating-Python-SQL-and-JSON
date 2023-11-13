@@ -707,3 +707,4 @@ def insert_realisateur(conn, film):
         query = f"""INSERT INTO realisateur (id_film, id_contributeur)
         VALUES ('{film[0]}', '{results[0][0]}');"""
         execute_query(conn,query)
+
