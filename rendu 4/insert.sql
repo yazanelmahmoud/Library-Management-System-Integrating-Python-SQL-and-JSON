@@ -205,6 +205,6 @@ VALUES
 INSERT INTO Sanction (id_sanction, DateSanction, DateFinSanction, motif, montant)
 VALUES
     (5, '2023-05-20', '2023-06-20', 'Retard', 8.00),
-    (6, '2023-06-18', '2023-07-18', 'Détérioration', 12.00
+    (6, '2023-06-18', '2023-07-18', 'Détérioration', 12.00);
 
 
