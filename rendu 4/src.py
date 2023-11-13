@@ -9,12 +9,10 @@ def option_1(conn):
     cur.execute("SELECT id_livre, isbn, resume, langue FROM livre")
     rows = cur.fetchall()
 
-    # Imprimir cabeçalho
     print("{:<10} {:<15} {:<50} {:<10}".format("ID Livre", "ISBN", "resume", "langue"))
     print("=" * 90)
 
     for row in rows:
-        # Imprimir cada linha formatada
         print("{:<10} {:<15} {:<50} {:<10}".format(row[0], row[1], row[2], row[3]))
 
 # select_specific_book
@@ -93,7 +91,7 @@ def choisir_option(conn):
             if choice == '5':
                 print("Au revoir !")
                 break
-            globals()[f'opcao_{choice}'](conn)
+            globals()[f'option_{choice}'](conn)
 
         else:
             print("Choix invalide. Veuillez réessayer.")
