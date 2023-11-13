@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
  
 CREATE TABLE IF NOT EXISTS Personnel (
     id INT PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES Utilisateur(id),
+    FOREIGN KEY (id) REFERENCES Utilisateur(id)
 );
 
 CREATE TABLE IF NOT EXISTS Adherent (
@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS Sanction (
    DateFinSanction DATE,
    motif VARCHAR(20) NOT NULL CHECK (motif IN ('Retard', 'Détérioration', 'Perte')),
    montant FLOAT,
+   paye BOOLEAN,
    FOREIGN KEY (id_adherent) REFERENCES Adherent(id)
 );
 
@@ -290,3 +291,15 @@ SELECT
 FROM Adherent P
 JOIN Utilisateur U ON P.id = U.id
 JOIN Adresse A ON A.id = U.adresse;
+
+CREATE VIEW SanctionsDetails AS
+SELECT
+    U.login,
+    S.id_sanction,
+    S.DateSanction,
+    S.DateFinSanction,
+    S.motif,
+    S.montant,
+    S.paye
+FROM Sanction S
+JOIN Utilisateur U ON U.id = S.id_adherent;

@@ -66,10 +66,10 @@ VALUES
     (1, 'user1', 'password1', 'User', 'One', 'user1@example.com', 1),
     (2, 'user2', 'password2', 'User', 'Two', 'user2@example.com', 2);
 
-INSERT INTO Personnel (id, id_personnel)
+INSERT INTO Personnel (id)
 VALUES
-    (1, 2),
-    (2, 1);
+    (1),
+    (2);
 
 INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut)
 VALUES

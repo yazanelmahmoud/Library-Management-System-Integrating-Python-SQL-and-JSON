@@ -150,8 +150,16 @@ def is_personnel(login):
         return True 
     return False
 
+def get_sanctions(login):
+    query = f"""
+            SELECT * FROM SanctionDetails
+            WHERE  = '{login}'
+    """
+    results = execute_query("bibliotheque", query)
+    return results
+
 def main():
-    # create_tables("bibliotheque")
+    create_tables("bibliotheque")
     print("Bienvenue à la bibliothèque")
     print("Prêts user1")
     for pret in get_prets_from_login("user1"):
