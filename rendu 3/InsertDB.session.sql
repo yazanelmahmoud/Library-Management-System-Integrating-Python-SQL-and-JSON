@@ -53,7 +53,7 @@ VALUES
     (1, 1, 'Neuf', true),
     (2, 1,'Bon', true),
     (3, 2,'Bon', false),
-    (4, 3,'Abimé', false),
+    (4, 3,'Abime', false),
     (5, 4,'Bon', false);
 
 INSERT INTO Adresse (id, rue, numero, codePostal, ville)
@@ -74,14 +74,14 @@ VALUES
 INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut)
 VALUES
     (1, '123-456-7890', '1990-07-20', 'active'),
-    (2, '987-654-3210', '1985-04-15', 'expiré');
+    (2, '987-654-3210', '1985-04-15', 'expire');
 
 INSERT INTO Pret (id, id_exemplaire, id_adherent, id_responsable, datePret, duree, dateRetour, etatRetour)
 VALUES
-    (1, 1, 1, 2, '2023-01-10', 14, '2023-01-24', 'bon'),
-    (2, 2, 2, 1, '2023-02-15', 7, '2023-02-22', 'neuf');
+    (1, 1, 1, 2, '2023-01-10', 14, '2023-01-24', 'Bon'),
+    (2, 2, 2, 1, '2023-02-15', 7, '2023-02-22', 'Neuf');
 
 INSERT INTO Sanction (id_sanction, DateSanction, DateFinSanction, motif, montant)
 VALUES
     (1, '2023-01-25', '2023-02-25', 'Retard', 10.00),
-    (2, '2023-02-23', '2023-03-23', 'Détérioration', 15.00);
+    (2, '2023-02-23', '2023-03-23', 'Deterioration', 15.00);

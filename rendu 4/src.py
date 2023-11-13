@@ -1,50 +1,67 @@
-import psycopg2
-import sys
 import os
+import psycopg2
 
-# select_all_books
+from insert import choose_table
+from helpers import get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, create_tables
+
+# Search
 def option_1(conn):
-    """ Query all rows in the books table """
-    cur = conn.cursor()
-    cur.execute("SELECT id_livre, isbn, resume, langue FROM livre")
-    rows = cur.fetchall()
-
-    print("{:<10} {:<15} {:<50} {:<10}".format("ID Livre", "ISBN", "resume", "langue"))
+    os.system('cls')
+    title = input("Entrez le titre de la ressource: ")
+    os.system('cls')
+    films = get_film_ressources(conn, title)
+    musiques = get_musique_ressources(conn, title)
+    livres = get_livre_ressources(conn, title)
+    print("Livres")
+    print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
     print("=" * 90)
+    for index, row in enumerate(livres):
+        print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[7], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("Films")
+    print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
+    print("=" * 90)
+    for index, row in enumerate(films):
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[5], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("Musiques")
+    print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Editeur", "Longueur"))
+    print("=" * 90)
+    for index, row in enumerate(musiques):
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(musiques)+len(livres), row[1], row[3], row[6]))
+    print("=" * 90)
+    choice = int(input("Index de la ressource à consulter (-1 pour retour): "))
+    if choice in range(-1, len(films)+len(musiques)+len(livres)):
+            if choice != -1:
+                if choice < len(livres):
+                    display_livre(conn,livres[choice])
+                elif choice >= len(livres) + len(films):
+                    display_musique(conn,musiques[choice-len(livres)-len(films)])
+                else:
+                    display_film(conn,films[choice-len(livres)])
 
-    for row in rows:
-        print("{:<10} {:<15} {:<50} {:<10}".format(row[0], row[1], row[2], row[3]))
+    os.system('cls')
 
-# select_specific_book
-def option_2(conn):
-    book_id = input("Entrez l'ID du livre : ")
-    """ Query all rows in the books table """
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM books WHERE id = %s", (book_id,))
-    rows = cur.fetchall()
-
-    for row in rows:
-        print(row)
-
-# insert_book
+# Handle prêts
 def option_3(conn):
-    title = input("Entrez le titre du livre : ")
-    author = input("Entrez l'auteur du livre : ")
-    year = input("Entrez l'année du livre : ")
-    book = (title, author, year)
-    
-    """ insert a new book into the books table """
-    sql = """INSERT INTO books(title, author, year)
-             VALUES(%s, %s, %s) RETURNING id;"""
-    cur = conn.cursor()
-    cur.execute(sql, book)
-    conn.commit()
-    book_id = cur.fetchone()[0]
-    print(book_id)
-    return book_id
+    print("A implementer")
+
+# Insert ressources
+def option_2(conn):
+    choose_table(conn)
+
+# Handle sanctions
+def option_4(conn):
+    print("A implementer")
+
+# Handle utilisateurs
+def option_5(conn):
+    print("A implementer")
 
 # Create a new table
-def option_4(conn):
+def option_6(conn):
     nom_table = input("Entrez le nom de la table : ")
     sql = f"""CREATE TABLE {nom_table} ();"""
     cur = conn.cursor()
@@ -76,19 +93,22 @@ def option_4(conn):
 
 def afficher_menu():
     print("\n=============== Menu ===============")
-    print("1. Afficher tous les livres")
-    print("2. Afficher un livre spécifique")
-    print("3. Ajouter un livre")
-    print("4. Créer une nouvelle table")
-    print("5. Quitter")
+    print("1. Recherche Livre / Musique / Film")
+    print("2. Ajouter un Livre / Musique / Film")
+    print("3. Gérer les prêts")
+    print("4. Gérer les sanctions")
+    print("5. Gérer les utilisateurs")
+    print("6. Créer une nouvelle table (BONUS)")
+    print("7. Visualiser les tables (BONUS)")
+    print("8. Quitter")
     print("===============================")
 
 def choisir_option(conn):
     while True:
         afficher_menu()
         choice = input("Quel opération voulez-vous effectuer ? ")
-        if choice in ('1', '2', '3', '4','5'):
-            if choice == '5':
+        if choice in ('1', '2', '3', '4','5', '6', '7', '8'):
+            if choice == '8':
                 print("Au revoir !")
                 break
             globals()[f'option_{choice}'](conn)
@@ -104,7 +124,7 @@ def connect():
             'host': 'localhost',
             'database': 'bibliotheque',
             'user': 'postgres',
-            'password': 'dev',
+            'password': 'postgres',
             'port': '5432'
         }
         conn = psycopg2.connect(**params)

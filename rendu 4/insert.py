@@ -3,13 +3,11 @@ from psycopg2 import sql
 
 def connect_to_database():
     try:
-        connection = psycopg2.connect(
-            user="postgres",
-            password="Ya79179688",
-            host="localhost",
-            port="5432",
-            database="Projet1_Biblio_Nf18"
-        )
+        connection = psycopg2.connect(database = "bibliotheque", 
+                        user = "postgres", 
+                        host= 'localhost',
+                        password = "postgres",
+                        port = 5432)
         return connection
     except (Exception, psycopg2.Error) as error:
         print("Erreur lors de la connexion à la base de données:", error)
@@ -57,16 +55,7 @@ def insert_into_livre(connection, values):
     finally:
         if cursor:
             cursor.close()
-"""
-# Exemple d'utilisation pour insérer dans la table Livre
-values_livre = {
-    'id_livre': 651,
-    'ISBN': '1234567890',
-    'resume': 'Résumé du livre',
-    'langue': 'Français'
-}
-insert_into_livre(connection, values_livre)
-"""
+
 
 # Exemple d'insertion dans la table Musique
 def insert_into_musique(connection, values):
@@ -85,12 +74,7 @@ def insert_into_musique(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Musique
-values_musique = {
-    'id_musique': 651,
-    'longueur': 180  # Valeur en secondes
-}
-insert_into_musique(connection, values_musique)
+
 
 
 # Exemple d'insertion dans la table Film
@@ -112,15 +96,6 @@ def insert_into_film(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Film
-values_film = {
-    'id_film': 651,
-    'langue': 'Français',
-    'length': 120,  # Durée en minutes
-    'synopsis': 'Synopsis du film'
-}
-insert_into_film(connection, values_film)
-
 # Exemple d'insertion dans la table Contributeur
 def insert_into_contributeur(connection, values):
     try:
@@ -141,16 +116,6 @@ def insert_into_contributeur(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Contributeur
-values_contributeur = {
-    'id': 1,
-    'prenom': 'John',
-    'nom': 'Doe',
-    'dateNaissance': '1990-01-01',
-    'nationalite': 'USA'
-}
-insert_into_contributeur(connection, values_contributeur)
-
 # Répétez ce processus pour les autres tables
 
 # Exemple d'insertion dans la table Auteur
@@ -169,13 +134,6 @@ def insert_into_auteur(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Auteur
-values_auteur = {
-    'id_livre': 1,
-    'id_contributeur': 1
-}
-insert_into_auteur(connection, values_auteur)
 
 # Continuez ce modèle pour les autres tables (Interprete, Compositeur, Acteur, Realisateur, Exemplaire, Adresse, Utilisateur, Personnel, Adherent, Pret, Sanction)
 
@@ -196,14 +154,6 @@ def insert_into_interprete(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Interprete
-values_interprete = {
-    'id_musique': 1,
-    'id_contributeur': 1
-}
-insert_into_interprete(connection, values_interprete)
-
-
 # Exemple d'insertion dans la table Compositeur
 def insert_into_compositeur(connection, values):
     try:
@@ -220,13 +170,6 @@ def insert_into_compositeur(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Compositeur
-values_compositeur = {
-    'id_musique': 1,
-    'id_contributeur': 2
-}
-insert_into_compositeur(connection, values_compositeur)
 
 # Continuez ce modèle pour les autres tables (Acteur, Realisateur, Exemplaire, Adresse, Utilisateur, Personnel, Adherent, Pret, Sanction)
 
@@ -247,13 +190,6 @@ def insert_into_acteur(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Acteur
-values_acteur = {
-    'id_film': 1,
-    'id_contributeur': 1
-}
-insert_into_acteur(connection, values_acteur)
-
 # Répétez ce processus pour les autres tables
 
 # Exemple d'insertion dans la table Realisateur
@@ -272,13 +208,6 @@ def insert_into_realisateur(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Realisateur
-values_realisateur = {
-    'id_film': 1,
-    'id_contributeur': 2
-}
-insert_into_realisateur(connection, values_realisateur)
 
 # Continuez ce modèle pour les autres tables (Exemplaire, Adresse, Utilisateur, Personnel, Adherent, Pret, Sanction)
 
@@ -300,15 +229,6 @@ def insert_into_exemplaire(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Exemplaire
-values_exemplaire = {
-    'id': 1,
-    'id_ressource': 1,
-    'etat': 'Neuf',
-    'disponible': True
-}
-insert_into_exemplaire(connection, values_exemplaire)
 
 # Répétez ce processus pour les autres tables
 
@@ -332,16 +252,6 @@ def insert_into_adresse(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Adresse
-values_adresse = {
-    'id': 1,
-    'rue': '123 Rue de la Libération',
-    'numero': 42,
-    'codePostal': 12345,
-    'ville': 'Villeville'
-}
-insert_into_adresse(connection, values_adresse)
-
 # Exemple d'insertion dans la table Utilisateur
 def insert_into_utilisateur(connection, values):
     try:
@@ -364,18 +274,6 @@ def insert_into_utilisateur(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Utilisateur
-values_utilisateur = {
-    'id': 1,
-    'login': 'john_doe',
-    'password': 'secure_password',
-    'prenom': 'John',
-    'nom': 'Doe',
-    'email': 'john.doe@example.com',
-    'adresse': 1  # L'ID de l'adresse associée à cet utilisateur
-}
-insert_into_utilisateur(connection, values_utilisateur)
-
 # Répétez ce processus pour les autres tables
 
 # Exemple d'insertion dans la table Personnel
@@ -395,13 +293,6 @@ def insert_into_personnel(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Personnel
-values_personnel = {
-    'id': 1,
-    'id_personnel': 1  # L'ID de l'utilisateur associé à ce personnel
-}
-insert_into_personnel(connection, values_personnel)
-
 # Exemple d'insertion dans la table Adherent
 def insert_into_adherent(connection, values):
     try:
@@ -420,15 +311,6 @@ def insert_into_adherent(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Adherent
-values_adherent = {
-    'id': 1,
-    'numeroTelephone': '123-456-7890',
-    'dateNaissance': '1990-01-01',
-    'statut': 'active'
-}
-insert_into_adherent(connection, values_adherent)
 
 # Répétez ce processus pour les autres tables
 
@@ -455,19 +337,6 @@ def insert_into_pret(connection, values):
         if cursor:
             cursor.close()
 
-# Exemple d'utilisation pour insérer dans la table Pret
-values_pret = {
-    'id': 1,
-    'id_exemplaire': 1,
-    'id_adherent': 1,
-    'id_responsable': 1,
-    'datePret': '2023-01-01',
-    'duree': 14,
-    'dateRetour': '2023-01-15',
-    'etatRetour': 'neuf'
-}
-insert_into_pret(connection, values_pret)
-
 # Exemple d'insertion dans la table Sanction
 def insert_into_sanction(connection, values):
     try:
@@ -487,18 +356,6 @@ def insert_into_sanction(connection, values):
     finally:
         if cursor:
             cursor.close()
-
-# Exemple d'utilisation pour insérer dans la table Sanction
-values_sanction = {
-    'id_sanction': 1,
-    'DateSanction': '2023-01-01',
-    'DateFinSanction': '2023-02-01',
-    'motif': 'Retard',
-    'montant': 10.0
-}
-insert_into_sanction(connection, values_sanction)
-
-
 
 # Assurez-vous de fermer la connexion à la fin de toutes les opérations
 connection.close()
@@ -548,14 +405,15 @@ def insert_data_into_table(connection, table_choice, values):
     elif table_choice == 17:
         insert_into_sanction(connection, values)
     else:
-        print("Choix non valide. Veuillez choisir un numéro de table valide.")
+        print("\n")
 
-def choose_table():
+def choose_table(conn):
     print("Choisissez la table dans laquelle vous souhaitez insérer des données :")
     print("1. Ressource")
     print("2. Livre")
     print("3. Musique")
     print("4. Film")
+    print("5. Retour")
     # Ajoutez d'autres tables ici
 
     table_choice = get_user_input("Entrez le numéro de la table : ", int)
@@ -662,15 +520,10 @@ def choose_table():
         values['DateSanction'] = input("Entrez la date de la sanction (format YYYY-MM-DD) : ")
         values['DateFinSanction'] = input("Entrez la date de fin de la sanction (format YYYY-MM-DD) : ")
         values['motif'] = input("Entrez le motif de la sanction : ")
-        values['montant'] = get_user_input("Entrez le montant de la sanction : ", float)17
+        values['montant'] = get_user_input("Entrez le montant de la sanction : ", float)
 
 
 
     # Appelez la fonction d'insertion correspondante
-    insert_data_into_table(connection, table_choice, values)
+    insert_data_into_table(conn, table_choice, values)
     
-
-# Utilisez votre fonction pour choisir la table et insérer les données
-choose_table()
-
-connection.close()
