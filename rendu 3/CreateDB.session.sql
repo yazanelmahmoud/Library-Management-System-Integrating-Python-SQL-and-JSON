@@ -106,9 +106,7 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
  
 CREATE TABLE IF NOT EXISTS Personnel (
     id INT PRIMARY KEY,
-    id_personnel INT NOT NULL,
     FOREIGN KEY (id) REFERENCES Utilisateur(id),
-    FOREIGN KEY (id_personnel) REFERENCES Utilisateur(id)
 );
 
 CREATE TABLE IF NOT EXISTS Adherent (
@@ -135,11 +133,12 @@ CREATE TABLE IF NOT EXISTS Pret (
 
 CREATE TABLE IF NOT EXISTS Sanction (
    id_sanction INT PRIMARY KEY,
+   id_adherent INT,
    DateSanction DATE,
    DateFinSanction DATE,
    motif VARCHAR(20) NOT NULL CHECK (motif IN ('Retard', 'Détérioration', 'Perte')),
    montant FLOAT,
-   FOREIGN KEY (id_sanction) REFERENCES Adherent(id)
+   FOREIGN KEY (id_adherent) REFERENCES Adherent(id)
 );
 
 CREATE VIEW LivreDetails AS
@@ -259,4 +258,35 @@ JOIN Utilisateur U ON A.id = U.id
 JOIN Exemplaire E ON P.id_exemplaire = E.id
 JOIN Ressource R ON E.id_ressource = R.id;
 
+CREATE VIEW PersonnelDetails AS
+SELECT
+    U.login,
+    U.password,
+    U.prenom,
+    U.nom,
+    U.email,
+    A.numero,
+    A.rue,
+    A.codePostal,
+    A.ville
+FROM Personnel P
+JOIN Utilisateur U ON P.id = U.id
+JOIN Adresse A ON A.id = U.adresse;
 
+CREATE VIEW AdherentDetails AS
+SELECT
+    U.login,
+    U.password,
+    U.prenom,
+    U.nom,
+    U.email,
+    A.numero,
+    A.rue,
+    A.codePostal,
+    A.ville,
+    P.numeroTelephone,
+    P.dateNaissance,
+    P.statut
+FROM Adherent P
+JOIN Utilisateur U ON P.id = U.id
+JOIN Adresse A ON A.id = U.adresse;
