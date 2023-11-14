@@ -1,8 +1,8 @@
 import os
 import psycopg2
 
-from insert import choose_table
-from helpers import get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, create_tables
+from insert import choose_table, insert_prêt
+from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login
 
 # Search
 def option_1(conn):
@@ -46,7 +46,27 @@ def option_1(conn):
 
 # Handle prêts
 def option_3(conn):
-    print("A implementer")
+    os.system('cls')
+    login = input("Entrez un login: ")
+    os.system('cls')
+    prêts = get_prets_en_cours_from_login(conn, login)
+    print(f"Prêts en cours des logins commençant par {login}")
+    print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format("Index","Date prêt", "Durée", "Date retour", "Titre","Prenom", "Nom", "Login"))
+    print("=" * 90)
+    for index, row in enumerate(prêts):
+        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row[1], row[2], row[3],row[15],row[9],row[10], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("1. Ajouter un nouveau prêt")
+    print("2. Gérer un prêt")
+    print("3. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice ==2: 
+        index = int(input("Index du prêt à modifier (-1 retour) : "))
+        display_prêts(conn,prêts[index])
+    elif choice ==1: 
+        insert_prêt(conn)
+
 
 # Insert ressources
 def option_2(conn):
@@ -92,10 +112,11 @@ def option_6(conn):
             break
 
 def afficher_menu():
+    os.system("cls")
     print("\n=============== Menu ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
-    print("3. Gérer les prêts (à implémenter)")
+    print("3. Gérer les prêts")
     print("4. Gérer les sanctions (à implémenter)")
     print("5. Gérer les utilisateurs (à implémenter)")
     print("6. Créer une nouvelle table (à implémenter)")

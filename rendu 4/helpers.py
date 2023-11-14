@@ -1,5 +1,6 @@
 import os
 import psycopg2
+from psycopg2 import sql
 
 def connect_to_db(name):
     conn = psycopg2.connect(database = name, 
@@ -8,6 +9,33 @@ def connect_to_db(name):
                         password = "postgres",
                         port = 5432)
     return conn
+
+def get_user_input(prompt, data_type):
+    while True:
+        try:
+            user_input = data_type(input(prompt))
+            return user_input
+        except ValueError:
+            print("Erreur de saisie. Veuillez entrer une valeur valide.")
+
+def insert_into_pret(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree) VALUES ({}, {}, {}, {}, {})").format(
+            sql.Literal(values['id_exemplaire']),
+            sql.Literal(values['id_adherent']),
+            sql.Literal(values['id_responsable']),
+            sql.Literal(values['datePret']),
+            sql.Literal(values['duree']),
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Pret")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Pret:", error)
+    finally:
+        if cursor:
+            cursor.close()
 
 def execute_query(conn, query):
     # Open a cursor to perform database operations
@@ -44,10 +72,10 @@ def create_tables(conn):
     execute_sql_file(conn, "../rendu 3/CreateDB.session.sql")
     execute_sql_file(conn, "../rendu 3/InsertDB.session.sql")
 
-def get_prets_from_login(conn, login):
+def get_prets_en_cours_from_login(conn, login):
     query = f"""
             SELECT * FROM PretDetails
-            WHERE login = '{login}'
+            WHERE login LIKE '{login}%' AND dateretour IS NULL
     """
     results = execute_query(conn, query)
     return results
@@ -62,9 +90,10 @@ def get_film_exemplaires(conn, titre):
 
 def get_film_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT titre_film, COUNT(titre_film) FROM FilmExemplaires
+            SELECT id_film, titre_film, synopsis, langue , COUNT(id_film) FROM FilmExemplaires
             WHERE titre_film LIKE '{titre}%' AND disponible = 'true'
-            GROUP BY titre_film
+            GROUP BY id_film, titre_film, synopsis, langue
+            HAVING COUNT(id_film) >0
     """
     results = execute_query(conn, query)
     return results
@@ -87,9 +116,10 @@ def get_musique_exemplaires(conn, titre):
 
 def get_musique_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT titre_musique, COUNT(titre_musique) FROM MusiqueExemplaires
+            SELECT id_musique, titre_musique, editeur, longueur , COUNT(id_musique) FROM musiqueExemplaires
             WHERE titre_musique LIKE '{titre}%' AND disponible = 'true'
-            GROUP BY titre_musique
+            GROUP BY id_musique, titre_musique, editeur, longueur
+            HAVING COUNT(id_musique) >0
     """
     results = execute_query(conn, query)
     return results
@@ -112,9 +142,10 @@ def get_livre_exemplaires(conn, titre):
 
 def get_livre_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT titre_livre, COUNT(titre_livre) FROM LivreExemplaires
+            SELECT id_livre, titre_livre, editeur, langue , COUNT(id_livre) FROM livreExemplaires
             WHERE titre_livre LIKE '{titre}%' AND disponible = 'true'
-            GROUP BY titre_livre
+            GROUP BY id_livre, titre_livre, editeur, langue
+            HAVING COUNT(id_livre) >0
     """
     results = execute_query(conn, query)
     return results
@@ -254,6 +285,33 @@ def display_exemplaires(conn, ressource, type):
         delete_exemplaire(conn, ressource, type)
     globals()[f'display_{type}'](conn, ressource)
     
+def display_exemplaires_prêt(conn, ressource, values):
+    os.system('cls')
+    query = f"""
+            SELECT * FROM Exemplaire
+            WHERE id_ressource = {ressource[0]} AND disponible = 'true'
+    """
+    exemplaires = execute_query(conn, query)
+    if len(exemplaires)>0:
+        print("\nExemplaires :")
+        for index, exemplaire in enumerate(exemplaires):
+            print("{:<10} {:<15} {:<15}".format(index+1, exemplaire[2], "disponible" if exemplaire[3] == 1 else "non disponible"))
+    choice = int(input("\nQuel exemplaire choisissez vous (-1 pour annuler) : "))
+    if choice in range(-1, len(exemplaires)+1):
+        if choice != -1:
+            values["id_exemplaire"] = exemplaires[choice-1][0]
+            values['datePret'] = input("Entrez la date de prêt (format YYYY-MM-DD) : ")
+            values['duree'] = get_user_input("Entrez la durée du prêt (en jours) : ", int)
+            insert_into_pret(conn, values)
+            emprunt_exemplaire(conn,values["id_exemplaire"])
+
+def emprunt_exemplaire(conn,id_exemplaire):
+    query = f"""
+        UPDATE Exemplaire
+        SET disponible = 'false'
+        WHERE id = '{id_exemplaire}';
+    """
+    _ = execute_query(conn, query)
 
 def delete_ressource(conn, id_ressource):
     query = f"""
@@ -708,3 +766,72 @@ def insert_realisateur(conn, film):
         VALUES ('{film[0]}', '{results[0][0]}');"""
         execute_query(conn,query)
 
+def display_prêts(conn,prêt):
+    print(f"Date prêt: {prêt[1]}")
+    print(f"Durée: {prêt[2]}")
+    print(f"Etat: {prêt[13]}")
+    print(f"Date retour: {prêt[3]}")
+    print(f"Etat retour: {prêt[4]}")
+    print(f"Titre ressource: {prêt[15]}")
+    print(f"Tel: {prêt[5]}")
+    print(f"Login: {prêt[8]}")
+    print(f"Prenom: {prêt[9]}")
+    print(f"Nom: {prêt[10]}")
+    print("\n")
+    print("1. Enregister le rendu du prêt")
+    print("2. Supprimer le prêt")
+    print("3. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice ==2: 
+        delete_prêt(conn, prêt)
+    elif choice ==1: 
+        rendre_prêt(conn, prêt)
+
+def delete_prêt(conn, pret):
+    if pret[3] is None:
+        query =        f"""UPDATE Exemplaire
+        SET disponible = 'true'
+        WHERE id = '{pret[20]}';"""
+        execute_query(conn,query)
+    if pret[4]:
+        query =        f"""UPDATE Exemplaire
+        SET etat = '{pret[4]}'
+        WHERE id = '{pret[20]}';"""
+        execute_query(conn,query)
+    query = f"""
+        DELETE FROM Pret
+        WHERE id = '{pret[0]}'
+        """
+    execute_query(conn,query)
+
+def rendre_prêt(conn, pret):
+    etat_retour = input("Etat retour (Abime, Neuf, Bon, Perdu): ")
+    date_retour = input("Date retour (YYYY-MM-DD): ")
+    query =        f"""UPDATE Pret
+        SET etatretour = '{etat_retour}', dateretour = '{date_retour}'
+        WHERE id = '{pret[0]}';"""
+    execute_query(conn,query)
+    query =        f"""UPDATE Exemplaire
+        SET etat = '{etat_retour}', disponible = 'true'
+        WHERE id = '{pret[20]}';"""
+    execute_query(conn,query)
+
+def check_login_adherent_valid(conn, login):
+    query = f"""
+            SELECT * FROM AdherentDetails
+            WHERE login = '{login}' AND statut = 'active'
+    """
+    results = execute_query(conn, query)
+    if len(results)>0:
+        return results[0][0]
+    return ""
+
+def check_login_personnel_valid(conn, login):
+    query = f"""
+            SELECT * FROM PersonnelDetails
+            WHERE login = '{login}'
+    """
+    results = execute_query(conn, query)
+    if len(results)>0:
+        return results[0][0]
+    return ""

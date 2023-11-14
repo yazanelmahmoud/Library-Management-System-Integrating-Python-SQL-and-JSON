@@ -124,8 +124,8 @@ CREATE TABLE IF NOT EXISTS Pret (
     id_responsable INT NOT NULL,
     datePret DATE NOT NULL,
     duree INT NOT NULL,
-    dateRetour DATE NOT NULL,
-    etatRetour VARCHAR(20) NOT NULL CHECK (etatRetour IN ('Neuf', 'Bon', 'Abime', 'Perdu')),
+    dateRetour DATE,
+    etatRetour VARCHAR(20) CHECK (etatRetour IN ('Neuf', 'Bon', 'Abime', 'Perdu')),
     FOREIGN KEY (id_exemplaire) REFERENCES Exemplaire(id) ON DELETE CASCADE,
     FOREIGN KEY (id_adherent) REFERENCES Adherent(id) ON DELETE CASCADE,
     FOREIGN KEY (id_responsable) REFERENCES Personnel(id) ON DELETE CASCADE
@@ -252,7 +252,8 @@ SELECT
     R.dateApparition,
     R.editeur,
     R.genre,
-    R.codeClassification
+    R.codeClassification,
+    E.id AS id_exemplaire
 FROM Pret P
 JOIN Adherent A ON P.id_adherent = A.id
 JOIN Utilisateur U ON A.id = U.id
@@ -261,6 +262,7 @@ JOIN Ressource R ON E.id_ressource = R.id;
 
 CREATE VIEW PersonnelDetails AS
 SELECT
+    A.id,
     U.login,
     U.password,
     U.prenom,
@@ -276,6 +278,7 @@ JOIN Adresse A ON A.id = U.adresse;
 
 CREATE VIEW AdherentDetails AS
 SELECT
+    A.id,
     U.login,
     U.password,
     U.prenom,

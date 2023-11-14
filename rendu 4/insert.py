@@ -1,7 +1,7 @@
 import os
 import psycopg2
 from psycopg2 import sql
-from helpers import execute_query
+from helpers import check_login_adherent_valid, check_login_personnel_valid, display_exemplaires_prêt, execute_query, get_film_exemplaires_disponibles, get_livre_exemplaires_disponibles, get_musique_exemplaires_disponibles
 
 def insert_into_ressource(connection, values):
     try:
@@ -311,15 +311,12 @@ def insert_into_adherent(connection, values):
 def insert_into_pret(connection, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Pret (id, id_exemplaire, id_adherent, id_responsable, datePret, duree, dateRetour, etatRetour) VALUES ({}, {}, {}, {}, {}, {}, {}, {})").format(
-            sql.Literal(values['id']),
+        insert_query = sql.SQL("INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree) VALUES ({}, {}, {}, {}, {})").format(
             sql.Literal(values['id_exemplaire']),
             sql.Literal(values['id_adherent']),
             sql.Literal(values['id_responsable']),
             sql.Literal(values['datePret']),
             sql.Literal(values['duree']),
-            sql.Literal(values['dateRetour']),
-            sql.Literal(values['etatRetour'])
         )
         cursor.execute(insert_query)
         connection.commit()
@@ -528,3 +525,49 @@ def choose_table(conn):
     # Appelez la fonction d'insertion correspondante
     insert_data_into_table(conn, table_choice, values)
     
+def insert_prêt(conn):
+    values = {}
+    login = input("Entrez votre login Personnel: ")
+    values['id_responsable'] = check_login_personnel_valid(conn, login)
+    os.system('cls')
+    if values['id_responsable'] != "":
+        login = input("Entrez un login Adhérent: ")
+        values['id_adherent'] = check_login_adherent_valid(conn, login)
+        os.system('cls')
+        if values['id_adherent'] != "":
+            title = input("Entrez le titre de la ressource: ")
+            os.system('cls')
+            films = get_film_exemplaires_disponibles(conn, title)
+            musiques = get_musique_exemplaires_disponibles(conn, title)
+            livres = get_livre_exemplaires_disponibles(conn, title)
+            print("Livres")
+            print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
+            print("=" * 90)
+            for index, row in enumerate(livres):
+                print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[2], row[3]))
+            print("=" * 90)
+            print("\n")
+            print("Films")
+            print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
+            print("=" * 90)
+            for index, row in enumerate(films):
+                print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[2], row[3]))
+            print("=" * 90)
+            print("\n")
+            print("Musiques")
+            print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Editeur", "Longueur"))
+            print("=" * 90)
+            for index, row in enumerate(musiques):
+                print("{:<10} {:<15} {:<50} {:<10}".format(index+len(musiques)+len(livres), row[1], row[2], row[3]))
+            print("=" * 90)
+            choice = int(input("Index de la ressource d'intérêt (-1 pour annuler): "))
+            if choice in range(-1, len(films)+len(musiques)+len(livres)):
+                if choice != -1:
+                        if choice < len(livres):
+                            ressource = livres[choice]
+                        elif choice >= len(livres) + len(films):
+                            ressource = musiques[choice-len(livres)-len(films)]
+                        else:
+                            ressource = films[choice-len(livres)]
+                        display_exemplaires_prêt(conn, ressource, values)
+
