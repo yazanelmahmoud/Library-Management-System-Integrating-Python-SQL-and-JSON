@@ -2,7 +2,7 @@ import os
 import psycopg2
 
 from insert import choose_table, insert_prêt
-from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login
+from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_utilisateurs
 
 # Variables globales
 passwordAdmin = "1"
@@ -76,21 +76,21 @@ def option_3(conn):
 def option_2(conn):
     choose_table(conn)
 
-# Handle prêts
-def option_3(conn):
-    print("A implementer")
-
 # Handle sanctions
 def option_4(conn):
     print("A implementer")
 
 # Handle utilisateurs
 def option_5(conn):
-    print("A implementer")
+    handle_utilisateurs(conn)
 
 # Visualiser les tables
 def option_6(conn):
     os.system('cls')
+    mot_de_passe = input("Entrez le mot de passe : ")
+    if mot_de_passe != passwordAdmin:
+        print("Mot de passe incorrect !")
+        return
     try:
         sql = """SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE';"""
         cur = conn.cursor()
@@ -307,14 +307,14 @@ def option_8(conn):
             
         
 def afficher_menu():
-    os.system("cls")
+    #os.system("cls")
     print("\n=============== Menu ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
     print("3. Gérer les prêts")
     print("4. Gérer les sanctions (à implémenter)")
-    print("5. Gérer les utilisateurs (à implémenter)")
-    print("6. Visualiser les tables (à implémenter)")
+    print("5. Gérer les utilisateurs")
+    print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
     print("8. Supprimer une table (Administrateur) ")
     print("9. Quitter")
@@ -341,7 +341,7 @@ def connect():
             'host': 'localhost',
             'database': 'bibliotheque',
             'user': 'postgres',
-            'password': 'dev',
+            'password': 'postgres',
             'port': '5432'
         }
         conn = psycopg2.connect(**params)

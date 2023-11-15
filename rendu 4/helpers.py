@@ -161,7 +161,7 @@ def get_livre_ressources(conn,titre):
 def get_adherent_details(conn, login):
     query = f"""
             SELECT * FROM AdherentDetails
-            WHERE login = '{login}'
+            WHERE login LIKE '{login}%'
     """
     results = execute_query(conn, query)
     return results   
@@ -169,7 +169,7 @@ def get_adherent_details(conn, login):
 def get_personnel_details(conn, login):
     query = f"""
             SELECT * FROM PersonnelDetails
-            WHERE login = '{login}'
+            WHERE login LIKE '{login}%'
     """
     results = execute_query(conn, query)
     return results
@@ -835,3 +835,225 @@ def check_login_personnel_valid(conn, login):
     if len(results)>0:
         return results[0][0]
     return ""
+
+def handle_utilisateurs(conn):
+    os.system("cls")
+    print("1. Gérer les Adhérents")
+    print("2. Gérer le Personnel")
+    print("3. Retour")
+    choice = int(input("Que voulez vous faire ?: "))
+    if choice == 1:
+        handle_adherent(conn)
+    elif choice == 2:
+        handle_personnel(conn)
+        
+def handle_personnel(conn):
+    login = input("Entrez login recherché: ")
+    personnel = get_personnel_details(conn, login)
+    print("\nMembres du personnel :")
+    for index, membre in enumerate(personnel):
+            print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
+    print("\n1. Ajouter membre")
+    print("2. Supprimer membre")
+    print("3. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice == 1:
+                insert_personnel(conn)
+    elif choice == 2:
+                delete_personnel(conn)
+
+def handle_adherent(conn):
+    login = input("Entrez login recherché: ")
+    adherent = get_adherent_details(conn, login)
+    print("\Adhérents :")
+    for index, membre in enumerate(adherent):
+            print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
+    print("\n1. Ajouter membre")
+    print("2. Supprimer membre")
+    print("3. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice == 1:
+                insert_adherent(conn)
+    elif choice == 2:
+                delete_adherent(conn)
+
+def insert_into_adresse(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Adresse (rue, numero, codePostal, ville) VALUES ({}, {}, {}, {})").format(
+            sql.Literal(values['rue']),
+            sql.Literal(values['numero']),
+            sql.Literal(values['codePostal']),
+            sql.Literal(values['ville'])
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Adresse")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Adresse:", error)
+    finally:
+        if cursor:
+            cursor.close()
+
+def insert_into_utilisateur(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ( {}, {}, {}, {}, {}, {})").format(
+            sql.Literal(values['login']),
+            sql.Literal(values['password']),
+            sql.Literal(values['prenom']),
+            sql.Literal(values['nom']),
+            sql.Literal(values['email']),
+            sql.Literal(values['id_adresse'])
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Utilisateur")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Utilisateur:", error)
+    finally:
+        if cursor:
+            cursor.close()
+
+def insert_into_personnel(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Personnel (id) VALUES ({})").format(
+            sql.Literal(values['id_utilisateur'])
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Personnel")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Personnel:", error)
+    finally:
+        if cursor:
+            cursor.close()
+
+# Exemple d'insertion dans la table Adherent
+def insert_into_adherent(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut) VALUES ({}, {}, {}, {})").format(
+            sql.Literal(values['id_utilisateur']),
+            sql.Literal(values['numeroTelephone']),
+            sql.Literal(values['dateNaissance']),
+            sql.Literal(values['statut'])
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Adherent")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Adherent:", error)
+    finally:
+        if cursor:
+            cursor.close()
+
+def get_adresse_id_from_data(conn, values):
+    try:
+        query = f"""
+        SELECT id FROM Adresse
+        WHERE rue = '{values["rue"]}' AND numero = '{values["numero"]}' AND codepostal = '{values["codePostal"]}' AND ville = '{values["ville"]}'
+        """
+        return execute_query(conn, query)[0]
+    except:
+        return ""
+
+def get_utilisateur_id_from_login(conn, login):
+    try:
+        query = f"""
+        SELECT id FROM Utilisateur
+        WHERE login = '{login}'
+        """
+        return execute_query(conn, query)[0][0]
+    except:
+        return ""
+
+def insert_personnel(conn):
+    os.system("cls")
+    values = {}
+    values['login'] = input("Login: ")
+    values['password'] = input("Password: ")
+    values['prenom'] = input("Prenom: ")
+    values['nom'] = input("Nom: ")
+    values['email'] = input("Email: ")
+    values['rue'] = input("Rue: ")
+    values['numero'] = input("N°: ")
+    values['codePostal'] = input("Code Postal: ")
+    values['ville'] = input("Ville: ")
+    try:
+        insert_into_adresse(conn,values)
+    except:
+        print("")
+    values['id_adresse'] = get_adresse_id_from_data(conn, values)
+    if values['id_adresse'] != "":
+        try:
+            insert_into_utilisateur(conn, values)
+        except:
+            print("")
+        values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
+        if values['id_utilisateur'] != "":
+            insert_into_personnel(conn,values)
+
+def delete_personnel(conn):
+    login = input("Login du membre du personnel à supprimer: ")
+    choice = input("Voulez-vous supprimer ses données utilisateurs ? (oui/non): ")
+    if choice == "oui":  
+        query = f"""
+            DELETE FROM Utilisateur
+            WHERE login = '{login}'
+            """
+        execute_query(conn, query)
+    else:
+        id = get_utilisateur_id_from_login(conn, login)
+        query = f"""
+            DELETE FROM Personnel
+            WHERE id = '{id}'
+            """
+        execute_query(conn, query)
+
+def insert_adherent(conn):
+    os.system("cls")
+    values = {}
+    values['login'] = input("Login: ")
+    values['password'] = input("Password: ")
+    values['prenom'] = input("Prenom: ")
+    values['nom'] = input("Nom: ")
+    values['email'] = input("Email: ")
+    values['numeroTelephone'] = input("numero de téléphone: ")
+    values['dateNaissance'] = input("Date de naissance (YYYY-MM-DD): ")
+    values['statut'] = "active"
+    values['rue'] = input("Rue: ")
+    values['numero'] = input("N°: ")
+    values['codePostal'] = input("Code Postal: ")
+    values['ville'] = input("Ville: ")
+    try:
+        insert_into_adresse(conn,values)
+    except:
+        print("")
+    values['id_adresse'] = get_adresse_id_from_data(conn, values)
+    if values['id_adresse'] != "":
+        try:
+            insert_into_utilisateur(conn, values)
+        except:
+            print("")
+        values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
+        if values['id_utilisateur'] != "":
+            insert_into_adherent(conn,values)
+
+def delete_adherent(conn):
+    login = input("Login de l'adhérent à supprimer: ")
+    choice = input("Voulez-vous supprimer ses données utilisateurs ? (oui/non): ")
+    if choice == "oui":  
+        query = f"""
+            DELETE FROM Utilisateur
+            WHERE login = '{login}'
+            """
+        execute_query(conn, query)
+    else:
+        id = get_utilisateur_id_from_login(conn, login)
+        query = f"""
+            DELETE FROM Adherent
+            WHERE id = '{id}'
+            """
+        execute_query(conn, query)

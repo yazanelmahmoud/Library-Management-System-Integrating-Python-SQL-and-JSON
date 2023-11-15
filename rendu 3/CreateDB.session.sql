@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS Adresse (
 
 CREATE TABLE IF NOT EXISTS Utilisateur (
     id SERIAL PRIMARY KEY,
-    login VARCHAR(150),
+    login VARCHAR(150) UNIQUE,
     password VARCHAR(150),
     prenom VARCHAR(100),
     nom VARCHAR(100),
