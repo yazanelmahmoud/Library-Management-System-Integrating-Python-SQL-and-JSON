@@ -1,14 +1,7 @@
 import os
 import psycopg2
 from psycopg2 import sql
-
-def connect_to_db(name):
-    conn = psycopg2.connect(database = name, 
-                        user = "postgres", 
-                        host= 'localhost',
-                        password = "postgres",
-                        port = 5432)
-    return conn
+from constants import ADMIN_PASSWORD
 
 def get_user_input(prompt, data_type):
     while True:
@@ -52,25 +45,6 @@ def execute_query(conn, query):
     conn.commit()
     # Close cursor and communication with the database
     cur.close()
-
-def execute_sql_file(conn, filename):
-    # Create a cursor object to execute SQL statements
-    cursor = conn.cursor()
-
-    # Read the SQL file
-    with open(filename, 'r') as file:
-        sql_script = file.read()
-
-    # Execute the SQL script
-    cursor.execute(sql_script)
-
-    # Commit the changes and close the connection
-    conn.commit()
-
-############################ PAS UTILISE ###############################################
-def create_tables(conn):
-    execute_sql_file(conn, "../rendu 3/CreateDB.session.sql")
-    execute_sql_file(conn, "../rendu 3/InsertDB.session.sql")
 
 def get_prets_en_cours_from_login(conn, login):
     query = f"""
@@ -178,22 +152,6 @@ def is_personnel(conn, login):
     if len(get_personnel_details(conn, login)>0):
         return True 
     return False
-
-def get_sanctions(conn, login):
-    query = f"""
-            SELECT * FROM SanctionDetails
-            WHERE login = '{login}'
-    """
-    results = execute_query(conn, query)
-    return results
-
-def get_all_sanctions(conn):
-    query = f"""
-            SELECT * FROM SanctionDetails
-    """
-    results = execute_query(conn, query)
-    return results
-#####################################################################################
 
 def get_auteurs_livre(conn, id_livre):
     query = f"""
@@ -848,6 +806,10 @@ def handle_utilisateurs(conn):
         handle_personnel(conn)
         
 def handle_personnel(conn):
+    mot_de_passe = input("Entrez le mot de passe : ")
+    if mot_de_passe != ADMIN_PASSWORD:
+        print("Mot de passe incorrect !")
+        return
     login = input("Entrez login recherché: ")
     personnel = get_personnel_details(conn, login)
     print("\nMembres du personnel :")
@@ -1057,3 +1019,93 @@ def delete_adherent(conn):
             WHERE id = '{id}'
             """
         execute_query(conn, query)
+
+def insert_prêt(conn):
+    values = {}
+    login = input("Entrez votre login Personnel: ")
+    values['id_responsable'] = check_login_personnel_valid(conn, login)
+    os.system('cls')
+    if values['id_responsable'] != "":
+        login = input("Entrez un login Adhérent: ")
+        values['id_adherent'] = check_login_adherent_valid(conn, login)
+        os.system('cls')
+        if values['id_adherent'] != "":
+            title = input("Entrez le titre de la ressource: ")
+            os.system('cls')
+            films = get_film_exemplaires_disponibles(conn, title)
+            musiques = get_musique_exemplaires_disponibles(conn, title)
+            livres = get_livre_exemplaires_disponibles(conn, title)
+            print("Livres")
+            print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
+            print("=" * 90)
+            for index, row in enumerate(livres):
+                print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[2], row[3]))
+            print("=" * 90)
+            print("\n")
+            print("Films")
+            print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
+            print("=" * 90)
+            for index, row in enumerate(films):
+                print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[2], row[3]))
+            print("=" * 90)
+            print("\n")
+            print("Musiques")
+            print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Editeur", "Longueur"))
+            print("=" * 90)
+            for index, row in enumerate(musiques):
+                print("{:<10} {:<15} {:<50} {:<10}".format(index+len(musiques)+len(livres), row[1], row[2], row[3]))
+            print("=" * 90)
+            choice = int(input("Index de la ressource d'intérêt (-1 pour annuler): "))
+            if choice in range(-1, len(films)+len(musiques)+len(livres)):
+                if choice != -1:
+                        if choice < len(livres):
+                            ressource = livres[choice]
+                        elif choice >= len(livres) + len(films):
+                            ressource = musiques[choice-len(livres)-len(films)]
+                        else:
+                            ressource = films[choice-len(livres)]
+                        display_exemplaires_prêt(conn, ressource, values)
+
+
+def choose_table(conn):
+    os.system("cls")
+    print("Choisissez la table dans laquelle vous souhaitez insérer des données :")
+    print("1. Livre")
+    print("2. Musique")
+    print("3. Film")
+    print("4. Retour")
+    # Ajoutez d'autres tables ici
+
+    table_choice = get_user_input("Entrez le numéro de la table : ", int)
+
+    # Saisie des valeurs auprès de l'utilisateur
+    values = {}
+
+    if table_choice == 1:  # Si la table est Livre
+            values['titre'] = input("Entrez le titre de la ressource : ")
+            values['dateApparition'] = input("Entrez la date d'apparition de la ressource (format YYYY-MM-DD) : ")
+            values['editeur'] = input("Entrez l'éditeur de la ressource : ")
+            values['genre'] = input("Entrez le genre de la ressource : ")
+            values['codeClassification'] = get_user_input("Entrez le code de classification de la ressource : ", int)
+            values['ISBN'] = input("Entrez le code ISBN du livre : ")
+            values['resume'] = input("Entrez le résumé du livre : ")
+            values['langue'] = input("Entrez la langue du livre : ")
+    # ...
+
+    elif table_choice == 2:  # Si la table est Musique
+        values['titre'] = input("Entrez le titre de la ressource : ")
+        values['dateApparition'] = input("Entrez la date d'apparition de la ressource (format YYYY-MM-DD) : ")
+        values['editeur'] = input("Entrez l'éditeur de la ressource : ")
+        values['genre'] = input("Entrez le genre de la ressource : ")
+        values['codeClassification'] = get_user_input("Entrez le code de classification de la ressource : ", int)
+        values['longueur'] = get_user_input("Entrez la longueur de la musique (en secondes) : ", int)
+
+    elif table_choice == 3:  # Si la table est Film
+        values['titre'] = input("Entrez le titre de la ressource : ")
+        values['dateApparition'] = input("Entrez la date d'apparition de la ressource (format YYYY-MM-DD) : ")
+        values['editeur'] = input("Entrez l'éditeur de la ressource : ")
+        values['genre'] = input("Entrez le genre de la ressource : ")
+        values['codeClassification'] = get_user_input("Entrez le code de classification de la ressource : ", int)
+        values['langue'] = input("Entrez la langue du film : ")
+        values['length'] = get_user_input("Entrez la durée du film (en minutes) : ", int)
+        values['synopsis'] = input("Entrez le synopsis du film : ")

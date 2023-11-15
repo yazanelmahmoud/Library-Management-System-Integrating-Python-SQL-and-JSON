@@ -1,11 +1,8 @@
 import os
 import psycopg2
+from constants import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER, ADMIN_PASSWORD
 
-from insert import choose_table, insert_prêt
-from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_utilisateurs
-
-# Variables globales
-passwordAdmin = "1"
+from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_utilisateurs, choose_table, insert_prêt
 
 # Search
 def option_1(conn):
@@ -88,7 +85,7 @@ def option_5(conn):
 def option_6(conn):
     os.system('cls')
     mot_de_passe = input("Entrez le mot de passe : ")
-    if mot_de_passe != passwordAdmin:
+    if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
     try:
@@ -153,7 +150,7 @@ def option_7(conn):
     os.system('cls')
     # Il faut que l'utilisateur soit un administrateur
     mot_de_passe = input("Entrez le mot de passe : ")
-    if mot_de_passe != passwordAdmin:
+    if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
     
@@ -260,7 +257,7 @@ def option_7(conn):
 def option_8(conn):
     os.system('cls')
     mot_de_passe = input("Entrez le mot de passe : ")
-    if mot_de_passe != passwordAdmin:
+    if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
     
@@ -338,11 +335,11 @@ def connect():
     try:
         # read connection parameters
         params = {
-            'host': 'localhost',
-            'database': 'bibliotheque',
-            'user': 'postgres',
-            'password': 'postgres',
-            'port': '5432'
+            'host': POSTGRES_HOST,
+            'database': POSTGRES_DB,
+            'user': POSTGRES_USER,
+            'password': POSTGRES_PASSWORD,
+            'port': POSTGRES_PORT
         }
         conn = psycopg2.connect(**params)
         return conn
