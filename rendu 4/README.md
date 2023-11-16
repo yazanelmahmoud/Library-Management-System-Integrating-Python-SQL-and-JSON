@@ -12,10 +12,11 @@ Le code SQL utilisé dans les requêtes (SELECT, GROUP BY) est dans le fichier R
 - Puis lancer main.py
 
 ## Stade d'avancée de l'application Python
-- Gestion des ressources, exemplaires, utilisateurs, prêts (Personnel)
+- Gestion des ressources, exemplaires, utilisateurs, prêts, sanctions (Personnel)
+- Interface de connexion
+- Interface Adhérent
 - Visualisation, Création, Suppression de tables (Administrateur)
 
 ## Reste à faire
-- Interface de connexion et interface Adhérent à développer 
 - Application sensible à la casse
 - On peut encore ajouter des fonctionnalités

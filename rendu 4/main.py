@@ -2,10 +2,10 @@ import os
 import psycopg2
 from constants import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER, ADMIN_PASSWORD
 
-from helpers import display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_utilisateurs, choose_table, insert_prêt
+from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt
 
 # Search
-def option_1(conn):
+def option_1(conn,login):
     os.system('cls')
     title = input("Entrez le titre de la ressource: ")
     os.system('cls')
@@ -45,8 +45,48 @@ def option_1(conn):
 
     os.system('cls')
 
+def option_adherent_1(conn,login):
+    os.system('cls')
+    title = input("Entrez le titre de la ressource: ")
+    os.system('cls')
+
+    films = get_film_ressources(conn, title)
+    musiques = get_musique_ressources(conn, title)
+    livres = get_livre_ressources(conn, title)
+    print("Livres")
+    print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
+    print("=" * 90)
+    for index, row in enumerate(livres):
+        print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[7], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("Films")
+    print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
+    print("=" * 90)
+    for index, row in enumerate(films):
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[5], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("Musiques")
+    print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Editeur", "Longueur"))
+    print("=" * 90)
+    for index, row in enumerate(musiques):
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(musiques)+len(livres), row[1], row[3], row[6]))
+    print("=" * 90)
+    choice = int(input("Index de la ressource à consulter (-1 pour retour): "))
+    if choice in range(-1, len(films)+len(musiques)+len(livres)):
+            if choice != -1:
+                if choice < len(livres):
+                    display_livre_adherent(conn,livres[choice])
+                elif choice >= len(livres) + len(films):
+                    display_musique_adherent(conn,musiques[choice-len(livres)-len(films)])
+                else:
+                    display_film_adherent(conn,films[choice-len(livres)])
+
+    os.system('cls')
+
 # Handle prêts
-def option_3(conn):
+def option_3(conn,login_personnel):
     os.system('cls')
     login = input("Entrez un login: ")
     os.system('cls')
@@ -66,23 +106,39 @@ def option_3(conn):
         index = int(input("Index du prêt à modifier (-1 retour) : "))
         display_prêts(conn,prêts[index])
     elif choice ==1: 
-        insert_prêt(conn)
+        insert_prêt(conn,login_personnel)
 
+def option_adherent_2(conn,login):
+    os.system('cls')
+    prêts = get_prets_en_cours_from_login(conn, login)
+    print(f"Prêts en cours des logins commençant par {login}")
+    print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format("Index","Date prêt", "Durée", "Date retour", "Titre","Prenom", "Nom", "Login"))
+    print("=" * 90)
+    for index, row in enumerate(prêts):
+        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row[1], row[2], row[3],row[15],row[9],row[10], row[8]))
+    print("=" * 90)
+    print("\n")
+    print("1. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
 
 # Insert ressources
-def option_2(conn):
+def option_2(conn,login):
     choose_table(conn)
 
 # Handle sanctions
-def option_4(conn):
-    print("A implementer")
+def option_4(conn,login):
+    handle_sanctions(conn)
+
+# Handle sanctions
+def option_adherent_3(conn,login):
+    handle_sanctions_adherent(conn,login)
 
 # Handle utilisateurs
-def option_5(conn):
+def option_5(conn,login):
     handle_utilisateurs(conn)
 
 # Visualiser les tables
-def option_6(conn):
+def option_6(conn,login):
     os.system('cls')
     mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
@@ -146,7 +202,7 @@ def option_6(conn):
         
     
 # Create a new table
-def option_7(conn):
+def option_7(conn,login):
     os.system('cls')
     # Il faut que l'utilisateur soit un administrateur
     mot_de_passe = input("Entrez le mot de passe : ")
@@ -254,7 +310,7 @@ def option_7(conn):
             print("Choix invalide. Veuillez réessayer.")
             
 #Supprimer une table
-def option_8(conn):
+def option_8(conn,login):
     os.system('cls')
     mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
@@ -304,12 +360,12 @@ def option_8(conn):
             
         
 def afficher_menu():
-    #os.system("cls")
-    print("\n=============== Menu ===============")
+    os.system("cls")
+    print("\n=============== Menu Personnel ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
     print("3. Gérer les prêts")
-    print("4. Gérer les sanctions (à implémenter)")
+    print("4. Gérer les sanctions")
     print("5. Gérer les utilisateurs")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
@@ -317,7 +373,16 @@ def afficher_menu():
     print("9. Quitter")
     print("=============================================")
 
-def choisir_option(conn):
+def afficher_menu_adherent():
+    os.system("cls")
+    print("\n=============== Menu Adherent ===============")
+    print("1. Recherche Livre / Musique / Film")
+    print("2. Consulter ses prêts")
+    print("3. Consulter ses sanctions")
+    print("4. Quitter")
+    print("=============================================")
+
+def choisir_option(conn,login):
     while True:
         afficher_menu()
         choice = input("Quel opération voulez-vous effectuer ? ")
@@ -325,11 +390,24 @@ def choisir_option(conn):
             if choice == '9':
                 print("Au revoir !")
                 break
-            globals()[f'option_{choice}'](conn)
+            globals()[f'option_{choice}'](conn,login)
 
         else:
             print("Choix invalide. Veuillez réessayer.")
-    
+
+def choisir_option_adherent(conn,login):
+    while True:
+        afficher_menu_adherent()
+        choice = input("Quel opération voulez-vous effectuer ? ")
+        if choice in ('1', '2', '3', '4'):
+            if choice == '4':
+                print("Au revoir !")
+                break
+            globals()[f'option_adherent_{choice}'](conn,login)
+
+        else:
+            print("Choix invalide. Veuillez réessayer.")
+
 def connect():
     conn = None
     try:
@@ -351,8 +429,24 @@ def disconnect(conn):
         conn.close()
         print('Database connection closed.')
 
+
+def connexion_utilisateur(conn):
+    connected = "non"
+    while connected == "non":
+        login = input("Login: ")
+        pwd = input("Mot de passe: ")
+        connected = check_credentials(conn, login, pwd)
+        if connected == "personnel":
+            choisir_option(conn, login)
+        elif connected == "adherent":
+            choisir_option_adherent(conn,login)
+        os.system("cls")
+        print("Identifiants incorrects ou compte suspendu")
+        
+
 def main():
     conn = connect()
+    connexion_utilisateur(conn)
     choisir_option(conn)
     disconnect(conn)
     

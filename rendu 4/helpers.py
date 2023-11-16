@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 import os
 import psycopg2
 from psycopg2 import sql
@@ -65,7 +66,7 @@ def get_film_exemplaires(conn, titre):
 def get_film_exemplaires_disponibles(conn, titre):
     query = f"""
             SELECT id_film, titre_film, synopsis, langue , COUNT(id_film) FROM FilmExemplaires
-            WHERE titre_film LIKE '{titre}%' AND disponible = 'true'
+            WHERE titre_film LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
             GROUP BY id_film, titre_film, synopsis, langue
             HAVING COUNT(id_film) >0
     """
@@ -91,7 +92,7 @@ def get_musique_exemplaires(conn, titre):
 def get_musique_exemplaires_disponibles(conn, titre):
     query = f"""
             SELECT id_musique, titre_musique, editeur, longueur , COUNT(id_musique) FROM musiqueExemplaires
-            WHERE titre_musique LIKE '{titre}%' AND disponible = 'true'
+            WHERE titre_musique LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
             GROUP BY id_musique, titre_musique, editeur, longueur
             HAVING COUNT(id_musique) >0
     """
@@ -117,7 +118,7 @@ def get_livre_exemplaires(conn, titre):
 def get_livre_exemplaires_disponibles(conn, titre):
     query = f"""
             SELECT id_livre, titre_livre, editeur, langue , COUNT(id_livre) FROM livreExemplaires
-            WHERE titre_livre LIKE '{titre}%' AND disponible = 'true'
+            WHERE titre_livre LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
             GROUP BY id_livre, titre_livre, editeur, langue
             HAVING COUNT(id_livre) >0
     """
@@ -149,7 +150,7 @@ def get_personnel_details(conn, login):
     return results
 
 def is_personnel(conn, login):
-    if len(get_personnel_details(conn, login)>0):
+    if (len(get_personnel_details(conn, login))>0):
         return True 
     return False
 
@@ -203,9 +204,12 @@ def insert_exemplaire(conn, ressource, type):
 
 def delete_exemplaire(conn, ressource, type):
     id = input("Id de l'exemplaire : ")
+    delete_exemplaire_from_id(conn, id)
+    display_exemplaires(conn, ressource, type)
+
+def delete_exemplaire_from_id(conn, id):
     query = f"""DELETE FROM Exemplaire WHERE id = {id}"""
     execute_query(conn,query)
-    display_exemplaires(conn, ressource, type)
 
 def update_exemplaire(conn, ressource, type):
     id = input("Id de l'exemplaire : ")
@@ -242,12 +246,27 @@ def display_exemplaires(conn, ressource, type):
     elif choice == 3:
         delete_exemplaire(conn, ressource, type)
     globals()[f'display_{type}'](conn, ressource)
-    
+
+def display_exemplaires_adherent(conn, ressource, type):
+    os.system('cls')
+    query = f"""
+            SELECT * FROM Exemplaire
+            WHERE id_ressource = {ressource[0]}
+    """
+    exemplaires = execute_query(conn, query)
+    if len(exemplaires)>0:
+        print("\nExemplaires :")
+        for exemplaire in exemplaires:
+            print("{:<10} {:<15} {:<15}".format(exemplaire[0], exemplaire[2], "disponible" if exemplaire[3] == 1 else "non disponible"))
+    print("1. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    globals()[f'display_{type}_adherent'](conn, ressource)
+ 
 def display_exemplaires_prêt(conn, ressource, values):
     os.system('cls')
     query = f"""
             SELECT * FROM Exemplaire
-            WHERE id_ressource = {ressource[0]} AND disponible = 'true'
+            WHERE id_ressource = {ressource[0]} AND disponible = 'true' AND etat != 'Perdu'
     """
     exemplaires = execute_query(conn, query)
     if len(exemplaires)>0:
@@ -368,6 +387,80 @@ def display_film(conn,film):
         update_film(conn, film)
     elif choice ==3: 
         display_exemplaires(conn, film, "film")
+
+def display_livre_adherent(conn,livre):
+    os.system('cls')
+    print(f"Titre: {livre[1]}")
+    print(f"Date apparition: {livre[2]}")
+    print(f"Editeur: {livre[3]}")
+    print(f"Genre: {livre[4]}")
+    print(f"Code de classification: {livre[5]}")
+    print(f"ISBN: {livre[6]}")
+    print(f"Résumé: {livre[7]}")
+    print(f"Langue: {livre[8]}")
+    auteurs = get_auteurs_livre(conn,livre[0])
+    if len(auteurs)>0:
+        print("\nAuteurs :")
+        for auteur in auteurs:
+            print("{:<10} {:<15} {} {:<15}".format(auteur[1], auteur[2], auteur[3], auteur[4]))
+    print("\n")
+    print("1. Consulter les exemplaires")
+    print("2. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice ==1: 
+        display_exemplaires_adherent(conn, livre,"livre")
+
+def display_musique_adherent(conn,musique):
+    os.system('cls')
+    print(f"Titre: {musique[1]}")
+    print(f"Date apparition: {musique[2]}")
+    print(f"Editeur: {musique[3]}")
+    print(f"Genre: {musique[4]}")
+    print(f"Code de classification: {musique[5]}")
+    print(f"Durée: {musique[6]}")
+    interpretes = get_interpretes_musique(conn,musique[0])
+    if len(interpretes)>0:
+        print("\nInterpretes :")
+        for interprete in interpretes:
+            print("{:<10} {:<15} {} {:<15}".format(interprete[1], interprete[2], interprete[3], interprete[4]))
+    compositeurs = get_compositeurs_musique(conn,musique[0])
+    if len(compositeurs)>0:
+        print("Compositeurs :")
+        for compositeur in compositeurs:
+            print("{:<10} {:<15} {} {:<15}".format(compositeur[1], compositeur[2], compositeur[3], compositeur[4]))
+    print("\n")
+    print("1. Consulter les exemplaires")
+    print("2. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice ==1: 
+        display_exemplaires_adherent(conn, musique, "musique")
+
+def display_film_adherent(conn,film):
+    os.system('cls')
+    print(f"Titre: {film[1]}")
+    print(f"Date apparition: {film[2]}")
+    print(f"Editeur: {film[3]}")
+    print(f"Genre: {film[4]}")
+    print(f"Synopsis: {film[5]}")
+    print(f"Code de classification: {film[6]}")
+    print(f"Durée: {film[7]}")
+    print(f"Langue: {film[8]}")
+    acteurs = get_acteurs_film(conn,film[0])
+    if len(acteurs)>0:
+        print("\nActeurs :")
+        for acteur in acteurs:
+            print("{:<10} {:<15} {} {:<15}".format(acteur[1], acteur[2], acteur[3], acteur[4]))
+    realisateurs = get_realisateurs_film(conn,film[0])
+    if len(realisateurs)>0:
+        print("Realisateurs :")
+        for realisateur in realisateurs:
+            print("{:<10} {:<15} {} {:<15}".format(realisateur[1], realisateur[2], realisateur[3], realisateur[4]))
+    print("\n")
+    print("1. Consulter les exemplaires")
+    print("2. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice ==1: 
+        display_exemplaires_adherent(conn, film, "film")
 
 def update_livre(conn, livre):
     os.system('cls')
@@ -762,9 +855,40 @@ def delete_prêt(conn, pret):
         """
     execute_query(conn,query)
 
+def insert_into_sanction(connection, values):
+    try:
+        cursor = connection.cursor()
+        insert_query = sql.SQL("INSERT INTO Sanction (id_adherent, DateSanction, motif, montant) VALUES ({}, {}, {}, {})").format(
+            sql.Literal(values['id_adherent']),
+            sql.Literal(values['DateSanction']),
+            sql.Literal(values['motif']),
+            sql.Literal(values['montant'])
+        )
+        cursor.execute(insert_query)
+        connection.commit()
+        print("Insertion réussie dans la table Sanction")
+    except (Exception, psycopg2.Error) as error:
+        print("Erreur lors de l'insertion dans la table Sanction:", error)
+    finally:
+        if cursor:
+            cursor.close()
+
 def rendre_prêt(conn, pret):
     etat_retour = input("Etat retour (Abime, Neuf, Bon, Perdu): ")
-    date_retour = input("Date retour (YYYY-MM-DD): ")
+    date_retour = datetime.strptime(input("Date retour (YYYY-MM-DD): "), '%Y-%m-%d').date()
+    if etat_retour != pret[13] or pret[1] + timedelta(days=pret[2]) < date_retour:
+        values ={}
+        values["id_adherent"]= get_utilisateur_id_from_login(conn,pret[8])
+        values["DateSanction"] = datetime.now()
+        if etat_retour != pret[13]:
+            values["motif"]="Deterioration"
+            if etat_retour == "Perdu":
+                values["motif"]="Perte"
+            values["montant"]=int(input("Montant à payer pour détérioration: "))
+        elif pret[1] + timedelta(days=pret[2]) < date_retour:
+            values["motif"]="Retard"
+            values["montant"]=int(input("Montant à payer pour retard: "))
+        insert_into_sanction(conn,values)
     query =        f"""UPDATE Pret
         SET etatretour = '{etat_retour}', dateretour = '{date_retour}'
         WHERE id = '{pret[0]}';"""
@@ -774,6 +898,14 @@ def rendre_prêt(conn, pret):
         WHERE id = '{pret[20]}';"""
     execute_query(conn,query)
 
+def update_status_adherent(conn):
+    login = input("Login: ")
+    id = get_utilisateur_id_from_login(conn,login)
+    status = input("Nouveau statut (active, exepire, suspendue, blackliste): ")
+    query = f"""UPDATE Adherent
+        SET statut = '{status}'
+        WHERE id = '{id}';"""
+    execute_query(conn,query)
 def check_login_adherent_valid(conn, login):
     query = f"""
             SELECT * FROM AdherentDetails
@@ -827,17 +959,20 @@ def handle_personnel(conn):
 def handle_adherent(conn):
     login = input("Entrez login recherché: ")
     adherent = get_adherent_details(conn, login)
-    print("\Adhérents :")
+    print("\nAdhérents :")
     for index, membre in enumerate(adherent):
-            print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
+            print("{:<10} {:<10} {:<15} {:15} {:<15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5], membre[12]))
     print("\n1. Ajouter membre")
     print("2. Supprimer membre")
-    print("3. Retour")
+    print("3. Modifier statut adherent")
+    print("4. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice == 1:
                 insert_adherent(conn)
     elif choice == 2:
                 delete_adherent(conn)
+    elif choice == 3:
+        update_status_adherent(conn)
 
 def insert_into_adresse(connection, values):
     try:
@@ -1020,9 +1155,8 @@ def delete_adherent(conn):
             """
         execute_query(conn, query)
 
-def insert_prêt(conn):
+def insert_prêt(conn,login):
     values = {}
-    login = input("Entrez votre login Personnel: ")
     values['id_responsable'] = check_login_personnel_valid(conn, login)
     os.system('cls')
     if values['id_responsable'] != "":
@@ -1109,3 +1243,110 @@ def choose_table(conn):
         values['langue'] = input("Entrez la langue du film : ")
         values['length'] = get_user_input("Entrez la durée du film (en minutes) : ", int)
         values['synopsis'] = input("Entrez le synopsis du film : ")
+
+def get_active_sanctions_from_login(conn,login):
+    query = f"""
+            SELECT * FROM SanctionDetails
+            WHERE login LIKE '{login}%' AND ((datefinsanction IS NULL OR datefinsanction > CURRENT_DATE) OR (paye = 'false' OR paye IS NULL))
+    """
+    results = execute_query(conn, query)
+    return results
+
+def handle_sanctions(conn):
+            os.system("cls")
+            login = input("Entrez un login : ")
+            os.system("cls")
+            sanctions = get_active_sanctions_from_login(conn,login)
+            print("Sanctions")
+            print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format("Index", "Login", "Date sanction", "Date fin sanction", "Motif", "Montant", "Payé"))
+            print("=" * 90)
+            for index, row in enumerate(sanctions):
+                print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
+                    index + 1,
+                    row[0] if row[0] is not None else "",
+                    f'{row[2]}' if row[2] is not None else "",
+                    f'{row[3]}' if row[3] is not None else "",
+                    row[4] if row[4] is not None else "",
+                    row[5] if row[5] is not None else "",
+                    'Oui' if row[6] is not None or row[6]==1 else "Non"
+                ))
+            print("=" * 90)
+            print("\n")
+            choice = int(input("Sélectionnez un index de sanction (-1 retour): "))
+            if choice in range(-1, len(sanctions)+1):
+                if choice != -1 and choice !=0:
+                    handle_sanction(conn, sanctions[choice-1])
+
+def handle_sanctions_adherent(conn,login):
+            os.system("cls")
+            sanctions = get_active_sanctions_from_login(conn,login)
+            print("Sanctions")
+            print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format("Index", "Login", "Date sanction", "Date fin sanction", "Motif", "Montant", "Payé"))
+            print("=" * 90)
+            for index, row in enumerate(sanctions):
+                print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
+                    index + 1,
+                    row[0] if row[0] is not None else "",
+                    f'{row[2]}' if row[2] is not None else "",
+                    f'{row[3]}' if row[3] is not None else "",
+                    row[4] if row[4] is not None else "",
+                    row[5] if row[5] is not None else "",
+                    'Oui' if row[6] is not None or row[6]==1 else "Non"
+                ))
+            print("=" * 90)
+            print("\n")
+            print("1. Retour")
+            choice = input("Que voulez-vous faire ?")
+
+def handle_sanction(conn, sanction):
+    print("1. Régler la sanction")
+    print("2. Ajouter date de fin à la sanction")
+    print("3. Supprimer la sanction")
+    print("4. Annuler")
+    choice = int(input("Que voulez-vous faire ?: "))
+    if choice ==1 :
+        pay_sanction(conn, sanction[1])
+    elif choice == 2:
+        set_end_date_sanction(conn, sanction[1])
+    elif choice == 3:
+        delete_sanction(conn, sanction[1])
+
+def pay_sanction(conn, id_sanction):
+    query = f"""
+    UPDATE Sanction
+    SET paye = 'true'
+    WHERE id_sanction = '{id_sanction}';
+    """
+    execute_query(conn,query)
+
+def set_end_date_sanction(conn, id_sanction):
+    date = input("Date de fin sanction (YYYY-MM-DD): ")
+    query = f"""
+    UPDATE Sanction
+    SET datefinsanction = '{date}'
+    WHERE id_sanction = '{id_sanction}';
+    """
+    execute_query(conn,query)
+
+def delete_sanction(conn, id_sanction):
+    query = f"""
+    DELETE FROM Sanction
+    WHERE id_sanction = '{id_sanction}';
+    """
+    execute_query(conn,query)
+
+def check_credentials(conn, login, pwd):
+    query = f"""
+    SELECT * FROM Utilisateur
+    WHERE login = '{login}' AND password = '{pwd}'
+    """
+    results = execute_query(conn, query)
+    if len(results)>0:
+        if is_personnel(conn, login):
+            return "personnel"
+        else:
+            statut = get_adherent_details(conn, login)[0][12]
+            if statut == 'active':
+                return "adherent"
+    return "non"
+
