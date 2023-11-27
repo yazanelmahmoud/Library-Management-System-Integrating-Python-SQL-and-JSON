@@ -2,7 +2,7 @@ import os
 import psycopg2
 from constants import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER, ADMIN_PASSWORD
 
-from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt
+from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, global_stats, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt, recommandations
 
 # Search
 def option_1(conn,login):
@@ -120,6 +120,10 @@ def option_adherent_2(conn,login):
     print("\n")
     print("1. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
+
+def option_adherent_4(conn,login):
+    os.system('cls')
+    recommandations(conn, login)
 
 # Insert ressources
 def option_2(conn,login):
@@ -358,7 +362,11 @@ def option_8(conn,login):
         else:
             print("Choix invalide. Veuillez réessayer.")
             
-        
+
+def option_9(conn,login):
+    os.system('cls')
+    global_stats(conn)
+
 def afficher_menu():
     os.system("cls")
     print("\n=============== Menu Personnel ===============")
@@ -369,8 +377,9 @@ def afficher_menu():
     print("5. Gérer les utilisateurs")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
-    print("8. Supprimer une table (Administrateur) ")
-    print("9. Quitter")
+    print("8. Supprimer une table (Administrateur)")
+    print("9. Statistiques")
+    print("10. Quitter")
     print("=============================================")
 
 def afficher_menu_adherent():
@@ -379,15 +388,16 @@ def afficher_menu_adherent():
     print("1. Recherche Livre / Musique / Film")
     print("2. Consulter ses prêts")
     print("3. Consulter ses sanctions")
-    print("4. Quitter")
+    print("4. Recommandations")
+    print("5. Quitter")
     print("=============================================")
 
 def choisir_option(conn,login):
     while True:
         afficher_menu()
         choice = input("Quel opération voulez-vous effectuer ? ")
-        if choice in ('1', '2', '3', '4','5', '6', '7', '8', '9'):
-            if choice == '9':
+        if choice in ('1', '2', '3', '4','5', '6', '7', '8', '9','10'):
+            if choice == '10':
                 print("Au revoir !")
                 break
             globals()[f'option_{choice}'](conn,login)
@@ -399,8 +409,8 @@ def choisir_option_adherent(conn,login):
     while True:
         afficher_menu_adherent()
         choice = input("Quel opération voulez-vous effectuer ? ")
-        if choice in ('1', '2', '3', '4'):
-            if choice == '4':
+        if choice in ('1', '2', '3', '4','5'):
+            if choice == '5':
                 print("Au revoir !")
                 break
             globals()[f'option_adherent_{choice}'](conn,login)
@@ -447,8 +457,8 @@ def connexion_utilisateur(conn):
 def main():
     conn = connect()
     connexion_utilisateur(conn)
-    choisir_option(conn)
     disconnect(conn)
+    os.system("cls")
     
 
 if __name__ == '__main__':

@@ -1350,3 +1350,41 @@ def check_credentials(conn, login, pwd):
                 return "adherent"
     return "non"
 
+def global_stats(conn):
+    query = f"""
+    SELECT titre, COUNT(titre) FROM PretDetails
+    GROUP BY titre
+    ORDER BY COUNT(titre) DESC
+    """
+    results = execute_query(conn, query)
+    if len(results)>0:
+        print("Statistiques\n")
+        print("{:<15}{:<5}".format("Titre", "Nombre d'emprunts"))
+        for result in results:
+            print("{:<15}{:<5}".format(result[0], result[1]))
+        print("\n1. Retour")
+        choice = input("Que voulez_vous faire ? : ")
+
+def recommandations(conn, login):
+    query = f"""
+    SELECT P.titre, P.genre, COUNT(P.titre) FROM PretDetails P
+    WHERE P.login='{login}'
+    GROUP BY titre, genre
+    ORDER BY COUNT(titre) DESC
+    """
+    results = execute_query(conn, query) 
+    if len(results)>0:
+        titre = results[0][0]
+        print(f"Comme vous avez aimé {results[0][0]}")
+        print(f"Nous vous recommandons dans le même genre '{results[0][1]}' :\n")
+        query = f"""
+        SELECT titre FROM Ressource R
+        WHERE R.genre='{results[0][1]}'
+        """
+        results = execute_query(conn, query)
+        if len(results)>0: 
+            for result in results:
+                if result[0] != titre:
+                    print("{:<15}".format(result[0]))
+        print("\n1. Retour")
+        choice = input("Que voulez_vous faire ? : ")
