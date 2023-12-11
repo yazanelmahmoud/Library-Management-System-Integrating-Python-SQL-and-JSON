@@ -11,10 +11,10 @@ VALUES (1, '0123456789', '1990-05-15', 'active');
 
 -- Après avoir ajouté les utilisateurs, vous pouvez insérer les autres données
 INSERT INTO Ressource (id, titre, dateApparition, editeur, genre, codeClassification, contributeur)
-VALUES (1, 'Titre du livre', '2023-01-15', 'Éditeur ABC', 'Fiction', 123, '{"prenom": "Paul", "nom": "Martin", "dateNaissance": "1985-10-20", "nationalite": "Français"}');
+VALUES (1, 'Titre du livre', '2023-01-15', 'Éditeur ABC', 'Fiction', 123, '{"prenomAuteur": "Paul", "nomAuteur": "Martin", "dateNaissance": "1985-10-20", "nationalite": "Français"}');
 
 INSERT INTO Ressource (id, titre, dateApparition, editeur, genre, codeClassification, contributeur)
-VALUES (2, 'Titre du film', '2022-05-20', 'Studio XYZ', 'Action', 456, '{"prenom": "Sophie", "nom": "Bertrand", "dateNaissance": "1990-05-15", "nationalite": "Espagnole"}');
+VALUES (2, 'Titre du film', '2022-05-20', 'Studio XYZ', 'Action', 456, '{"prenomRealisateur": "Sophie", "nomRealisateur": "Bertrand", "dateNaissance": "1990-05-15", "nationalite": "Espagnole"}');
 
 INSERT INTO Livre (id_livre, ISBN, resume, langue)
 VALUES (1, '123-456-789', 'Résumé du livre', 'Français');
