@@ -1,38 +1,41 @@
--- Ajout des Utilisateurs
-INSERT INTO Utilisateur (id, login, password, prenom, nom, email, adresse)
-VALUES (1, 'utilisateur1', 'mdp123', 'Jean', 'Dupont', 'jean@example.com', '{"rue": "Rue de la Paix", "numero": 10, "codePostal": "75001", "ville": "Paris"}');
 
-INSERT INTO Utilisateur (id, login, password, prenom, nom, email, adresse)
-VALUES (2,'utilisateur2', 'secret456', 'Alice', 'Lefevre', 'alice@example.com', '{"rue": "Avenue des Roses", "numero": 25, "codePostal": "69002", "ville": "Lyon"}');
+INSERT INTO Ressource (titre, dateApparition, editeur, genre, codeClassification, contributeur, exemplaires) VALUES
+('Harry Potter à l''école des sorciers', '1997-06-26', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Chris Columbus", "acteur": "Daniel Radcliffe"}', '[{"id": 1, "etat": "Neuf"}, {"id": 2, "etat": "Bon"}, {"id": 3, "etat": "Abime"}]'),
+('Harry Potter et la Chambre des secrets', '1998-07-02', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Chris Columbus", "acteur": "Daniel Radcliffe"}', '[{"id": 4, "etat": "Neuf"}, {"id": 5, "etat": "Bon"}, {"id": 6, "etat": "Abime"}]'),
+('Harry Potter et le Prisonnier d''Azkaban', '1999-07-08', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Alfonso Cuaron", "acteur": "Daniel Radcliffe"}', '[{"id": 7, "etat": "Neuf"}, {"id": 8, "etat": "Bon"}, {"id": 9, "etat": "Abime"}]'),
+('Harry Potter et la Coupe de feu', '2000-07-08', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Mike Newell", "acteur": "Daniel Radcliffe"}', '[{"id": 10, "etat": "Neuf"}, {"id": 11, "etat": "Bon"}, {"id": 12, "etat": "Abime"}]'),
+('Harry Potter et l''Ordre du phénix', '2003-07-08', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"David Yates", "acteur": "Daniel Radcliffe"}', '[{"id": 13, "etat": "Neuf"}, {"id": 14, "etat": "Bon"}, {"id": 15, "etat": "Abime"}]'),
+('Harry Potter et le Prince de sang-mêlé', '2005-07-08', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"David Yates", "acteur": "Daniel Radcliffe"}', '[{"id": 16, "etat": "Neuf"}, {"id": 17, "etat": "Bon"}, {"id": 18, "etat": "Abime"}]'),
+('Harry Potter et les Reliques de la Mort', '2007-07-08', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"David Yates", "acteur": "Daniel Radcliffe"}', '[{"id": 19, "etat": "Neuf"}, {"id": 20, "etat": "Bon"}, {"id": 21, "etat": "Abime"}]'),
+('Le Seigneur des anneaux : La Communauté de l''anneau', '1954-07-29', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Elijah Wood"}', '[{"id": 22, "etat": "Neuf"}, {"id": 23, "etat": "Bon"}, {"id": 24, "etat": "Abime"}]'),
+('Le Seigneur des anneaux : Les Deux Tours', '1954-11-11', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Elijah Wood"}', '[{"id": 25, "etat": "Neuf"}, {"id": 26, "etat": "Bon"}, {"id": 27, "etat": "Abime"}]'),
+('Le Seigneur des anneaux : Le Retour du roi', '1955-10-20', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Elijah Wood"}', '[{"id": 28, "etat": "Neuf"}, {"id": 29, "etat": "Bon"}, {"id": 30, "etat": "Abime"}]'),
+('Le Hobbit : Un voyage inattendu', '1937-09-21', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Martin Freeman"}', '[{"id": 31, "etat": "Neuf"}, {"id": 32, "etat": "Bon"}, {"id": 33, "etat": "Abime"}]'),
+('Le Hobbit : La Désolation de Smaug', '1937-09-21', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Martin Freeman"}', '[{"id": 34, "etat": "Neuf"}, {"id": 35, "etat": "Bon"}, {"id": 36, "etat": "Abime"}]'),
+('Le Hobbit : La Bataille des Cinq Armées', '1937-09-21', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Martin Freeman"}', '[{"id": 37, "etat": "Neuf"}, {"id": 38, "etat": "Bon"}, {"id": 39, "etat": "Abime"}]'),
+('Le Hobbit', '1937-09-21', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Martin Freeman"}', '[{"id": 40, "etat": "Neuf"}, {"id": 41, "etat": "Bon"}, {"id": 42, "etat": "Abime"}]'),
+('Le Hobbit : La Désolation de Smaug', '1937-09-21', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.R.R. Tolkien", "realisateur" :"Peter Jackson", "acteur": "Martin Freeman"}', '[{"id": 43, "etat": "Neuf"}, {"id": 44, "etat": "Bon"}, {"id": 45, "etat": "Abime"}]');
 
--- Ajout des Adherents qui sont des Utilisateurs
-INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut)
-VALUES (1, '0123456789', '1990-05-15', 'active');
 
--- Après avoir ajouté les utilisateurs, vous pouvez insérer les autres données
-INSERT INTO Ressource (id, titre, dateApparition, editeur, genre, codeClassification, contributeur)
-VALUES (1, 'Titre du livre', '2023-01-15', 'Éditeur ABC', 'Fiction', 123, '{"prenomAuteur": "Paul", "nomAuteur": "Martin", "dateNaissance": "1985-10-20", "nationalite": "Français"}');
+INSERT INTO Utilisateur (id, login, password, prenom, nom, email, adresse) VALUES 
+(1, 'utilisateur1', 'mdp123', 'Jean', 'Dupont','jean@example.com', '{"rue": "Rue de la Paix", "numero": 10, "codePostal": "75001", "ville": "Paris"}'),
+(2, 'utilisateur2', 'mdp123', 'Fabrice', 'Durand','fabrice@example.com', '{"rue": "Rue de Clermont", "numero": 20, "codePostal": "30200", "ville": "Bagnols-sur-Cèze"}'),
+(3, 'utilisateur3', 'mdp123', 'Marie', 'Martin','marie@example.com', '{"rue": "Rue de la République", "numero": 30, "codePostal": "13001", "ville": "Marseille"}'),
+(4, 'utilisateur4', 'mdp123', 'Sophie', 'Bernard','sophie@example.com', '{"rue": "Rue de la Liberté", "numero": 40, "codePostal": "69001", "ville": "Lyon"}'),
+(5, 'utilisateur5', 'mdp123', 'Pierre', 'Petit', 'pierre@example.com', '{"rue": "Rue de la Gare", "numero": 50, "codePostal": "59000", "ville": "Lille"}');
 
-INSERT INTO Ressource (id, titre, dateApparition, editeur, genre, codeClassification, contributeur)
-VALUES (2, 'Titre du film', '2022-05-20', 'Studio XYZ', 'Action', 456, '{"prenomRealisateur": "Sophie", "nomRealisateur": "Bertrand", "dateNaissance": "1990-05-15", "nationalite": "Espagnole"}');
+INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions) VALUES
+(1, '0123456789', '2002-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-01","dateRetour": "2023-12-10"},{"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]'),
+(3, '0456926843', '1995-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-02","dateRetour": "2023-10-11"}, {"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]'),
+(5, '0634434566', '2003-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-03","dateRetour": "2023-12-13"}, {"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]');
 
-INSERT INTO Livre (id_livre, ISBN, resume, langue)
-VALUES (1, '123-456-789', 'Résumé du livre', 'Français');
 
-INSERT INTO Film (id_film, langue, length, synopsis)
-VALUES (2, 'Français', 120, 'Synopsis du film');
+SELECT prenom, nom, email, A->>'rue' AS Rue, A->>'numero' AS Numero, A->>'codePostal' AS Code_Postal, A->>'ville' AS Ville 
+FROM Utilisateur U, JSON_ARRAY_ELEMENT(U.Adresse) A;
 
-INSERT INTO Exemplaire (id_ressource, etat, disponible)
-VALUES (1, 'Neuf', true);
+SELECT u.nom, u.prenom, a.statut, s->>'motif' AS Motif, s->>'datePret' AS Date_Pret, s->>'dateRetour' AS Date_Retour
+FROM Utilisateur u, Adherent a, JSON_ARRAY_ELEMENTS(a.Sanctions) s
+WHERE u.id = a.id;
 
-INSERT INTO Exemplaire (id_ressource, etat, disponible)
-VALUES (2, 'Bon', true);
-
-INSERT INTO Personnel (id)
-VALUES (1);
-
-INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree)
-VALUES (1, 1, 1, '2023-01-20', 15);
-
-INSERT INTO Sanction (id_adherent, DateSanction, DateFinSanction, motif, montant, paye)
-VALUES (1, '2023-01-25', '2023-02-25', 'Retard', 50.0, false);
+SELECT titre, dateApparition, editeur, genre, codeClassification, CAST(E->>'id' AS INTEGER) AS id_exemplaire, E->>'etat' AS etat_exemplaire, C->>'realisateur' AS Realisateur, C->>'acteur' AS Acteur, C->>'auteur' AS Auteur
+FROM Ressource R, JSON_ARRAY_ELEMENTS(R.exemplaires) E, JSON_ARRAY_ELEMENTS(R.contributeur) C;
