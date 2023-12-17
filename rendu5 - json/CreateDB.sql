@@ -17,10 +17,7 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     email VARCHAR(150),
     adresse JSON NOT NULL
 );
-CREATE TABLE IF NOT EXISTS Personnel (
-    id INT PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES Utilisateur(id) ON DELETE CASCADE
-);
+
 CREATE TABLE IF NOT EXISTS Adherent (
     id INT PRIMARY KEY,
     numeroTelephone VARCHAR(100) NOT NULL,
