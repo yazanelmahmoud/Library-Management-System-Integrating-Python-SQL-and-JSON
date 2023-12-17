@@ -1,1 +1,6 @@
-
+POSTGRES_HOST="localhost"
+POSTGRES_PORT=5432
+POSTGRES_DB="bibliotheque"
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="postgres"
+ADMIN_PASSWORD="1"
