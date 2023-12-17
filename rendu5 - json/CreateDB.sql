@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS Ressource (
     editeur VARCHAR(100),
     genre VARCHAR(100),
     codeClassification INT,
+    exemplaires JSON NOT NULL,
     contributeur JSON NOT NULL
-    exemplaires JSON NOT NULL
 );
 CREATE TABLE IF NOT EXISTS Utilisateur (
     id SERIAL PRIMARY KEY,
