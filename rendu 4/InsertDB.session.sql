@@ -68,13 +68,12 @@ VALUES
 
 INSERT INTO Personnel (id)
 VALUES
-    (1),
-    (2);
+    (1);
 
 INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut)
 VALUES
     (1, '123-456-7890', '1990-07-20', 'active'),
-    (2, '987-654-3210', '1985-04-15', 'expire');
+    (2, '987-654-3210', '1985-04-15', 'active');
 
 INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree, dateRetour, etatRetour)
 VALUES
