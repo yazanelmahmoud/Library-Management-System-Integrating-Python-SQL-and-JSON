@@ -54,7 +54,6 @@ email: VARCHAR,
 adresse : JSON
 )
 
-
 Personnel
 (#id_personnel -> utilisateur
 )
