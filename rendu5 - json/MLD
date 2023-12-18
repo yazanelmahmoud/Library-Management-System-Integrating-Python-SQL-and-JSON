@@ -1,0 +1,70 @@
+Livre
+(#id: INT,
+titre: VARCHAR,
+dateApparition: DATE,
+editeur: VARCHAR,
+genre: VARCHAR,
+codeClassification: VARCHAR,
+dureeMaxPret INT,
+ISBN VARCHAR,
+resume TEXT,
+langue VARCHAR,
+contributeur JSON,
+exemplaires JSON
+)
+
+Musique
+(#id: INT,
+titre: VARCHAR,
+dateApparition: DATE,
+editeur: VARCHAR,
+genre: VARCHAR,
+codeClassification: VARCHAR,
+dureeMaxPret INT,
+longueur INT,
+langue VARCHAR,
+contributeur JSON,
+exemplaires JSON
+)
+
+Film
+(#id: INT,
+titre: VARCHAR,
+dateApparition: DATE,
+editeur: VARCHAR,
+genre: VARCHAR,
+codeClassification: VARCHAR,
+dureeMaxPret INT,
+langue VARCHAR,
+longueur INT,
+synopsis TEXT,
+langue VARCHAR,
+contributeur JSON,
+exemplaires JSON
+)
+
+Utilisateur
+(
+#id : INT
+login: VARCHAR,
+password: VARCHAR,
+prenom: VARCHAR,
+nom: VARCHAR,
+email: VARCHAR,
+adresse : JSON
+)
+
+
+Personnel
+(#id_personnel -> utilisateur
+)
+
+Adherent
+(#id_adherent -> Utilisateur(id),
+numeroTelephone: VARCHAR,
+dateNaissance: DATE,
+statut: {'active', 'expiré', 'suspendue', 'blacklisté'},
+sanctions JSON,
+prets JSON
+)
+
