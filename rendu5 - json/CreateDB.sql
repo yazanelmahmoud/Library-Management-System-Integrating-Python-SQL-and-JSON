@@ -64,3 +64,30 @@ CREATE TABLE IF NOT EXISTS Personnel (
     id INT PRIMARY KEY,
     FOREIGN KEY (id) REFERENCES Utilisateur(id) ON DELETE CASCADE
 );
+
+CREATE VIEW PersonnelDetails AS
+SELECT
+    U.id,
+    U.login,
+    U.password,
+    U.prenom,
+    U.nom,
+    U.email,
+    U.adresse
+FROM Personnel P
+JOIN Utilisateur U ON P.id = U.id;
+
+CREATE VIEW AdherentDetails AS
+SELECT
+    U.id,
+    U.login,
+    U.password,
+    U.prenom,
+    U.nom,
+    U.email,
+    U.adresse,
+    P.numeroTelephone,
+    P.dateNaissance,
+    P.statut
+FROM Adherent P
+JOIN Utilisateur U ON P.id = U.id;
