@@ -19,8 +19,9 @@ INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions, pre
 (2, '0456926843', '1995-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-02","dateRetour": "2023-10-11"}, {"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 304, "exemplaireId": 102,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]'),
 (3, '0634434566', '2003-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-03","dateRetour": "2023-12-13"}, {"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 305, "exemplaireId": 102,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]');
 
--- SELECT prenom, nom, email, A->>'rue' AS Rue, A->>'numero' AS Numero, A->>'codePostal' AS Code_Postal, A->>'ville' AS Ville 
--- FROM Utilisateur U, JSON_ARRAY_ELEMENT(U.Adresse) A;
+
+SELECT prenom, nom, email, A->>'rue' AS Rue, A->>'numero' AS Numero, A->>'codePostal' AS Code_Postal, A->>'ville' AS Ville 
+FROM Utilisateur U, JSON_ARRAY_ELEMENT(U.Adresse) A;
 
 -- SELECT u.nom, u.prenom, a.statut, s->>'motif' AS Motif, s->>'datePret' AS Date_Pret, s->>'dateRetour' AS Date_Retour
 -- FROM Utilisateur u, Adherent a, JSON_ARRAY_ELEMENTS(a.Sanctions) s
