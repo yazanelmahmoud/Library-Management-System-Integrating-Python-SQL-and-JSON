@@ -1,13 +1,46 @@
-CREATE TABLE IF NOT EXISTS Ressource (
+CREATE TABLE IF NOT EXISTS Livre (
     id SERIAL PRIMARY KEY,
-    titre VARCHAR(100),
-    dateApparition DATE,
-    editeur VARCHAR(100),
-    genre VARCHAR(100),
-    codeClassification INT,
-    exemplaires JSON NOT NULL,
-    contributeur JSON NOT NULL
+    titre VARCHAR(100) NOT NULL,
+    dateApparition DATE NOT NULL,
+    editeur VARCHAR(100) NOT NULL,
+    genre VARCHAR(100) NOT NULL,
+    codeClassification INT NOT NULL,
+    dureeMaxPret INT NOT NULL,
+    ISBN VARCHAR(20) NOT NULL,
+    resume TEXT,
+    langue VARCHAR(50),
+    contributeur JSON NOT NULL,
+    exemplaires JSON NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS Musique (
+    id SERIAL PRIMARY KEY,
+    titre VARCHAR(100) NOT NULL,
+    dateApparition DATE NOT NULL,
+    editeur VARCHAR(100) NOT NULL,
+    genre VARCHAR(100) NOT NULL,
+    codeClassification INT NOT NULL,
+    dureeMaxPret INT NOT NULL,
+    longueur INT NOT NULL,
+    contributeur JSON NOT NULL,
+    exemplaires JSON NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Film (
+    id SERIAL PRIMARY KEY,
+    titre VARCHAR(100) NOT NULL,
+    dateApparition DATE NOT NULL,
+    editeur VARCHAR(100) NOT NULL,
+    genre VARCHAR(100) NOT NULL,
+    codeClassification INT NOT NULL,
+    dureeMaxPret INT NOT NULL,
+    langue VARCHAR(50) NOT NULL,
+    length INT NOT NULL,
+    synopsis TEXT,
+    contributeur JSON NOT NULL,
+    exemplaires JSON NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS Utilisateur (
     id SERIAL PRIMARY KEY,
     login VARCHAR(150) UNIQUE,
@@ -26,19 +59,11 @@ CREATE TABLE IF NOT EXISTS Adherent (
         statut IN ('active', 'expire', 'suspendue', 'blackliste')
     ),
     sanctions JSON,
+    prets JSON,
     FOREIGN KEY (id) REFERENCES Utilisateur(id) ON DELETE CASCADE
 );
-CREATE TABLE IF NOT EXISTS Pret (
-    id SERIAL PRIMARY KEY,
-    id_exemplaire INT NOT NULL,
-    id_adherent INT NOT NULL,
-    id_responsable INT NOT NULL,
-    datePret DATE NOT NULL,
-    duree INT NOT NULL,
-    dateRetour DATE,
-    etatRetour VARCHAR(20) CHECK (etatRetour IN ('Neuf', 'Bon', 'Abime', 'Perdu')),
-    CHECK(dateRetour>=datePret),
-    FOREIGN KEY (id_exemplaire) REFERENCES Exemplaire(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_adherent) REFERENCES Adherent(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_responsable) REFERENCES Personnel(id) ON DELETE CASCADE
+
+CREATE TABLE IF NOT EXISTS Personnel (
+    id INT PRIMARY KEY,
+    FOREIGN KEY (id) REFERENCES Utilisateur(id) ON DELETE CASCADE
 );
