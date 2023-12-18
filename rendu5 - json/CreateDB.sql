@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS Film (
     contributeur JSON NOT NULL,
     exemplaires JSON NOT NULL
 );
+
 CREATE TABLE IF NOT EXISTS Utilisateur (
     id SERIAL PRIMARY KEY,
     login VARCHAR(150) UNIQUE,
