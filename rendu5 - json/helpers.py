@@ -75,8 +75,8 @@ def get_film_exemplaires_disponibles(conn, titre):
 
 def get_film_ressources(conn, titre):
     query = f"""
-            SELECT * FROM FilmDetails
-            WHERE titre_film LIKE '{titre}%'
+            SELECT * FROM Film
+            WHERE titre LIKE '{titre}%'
     """
     results = execute_query(conn, query)
     return results
@@ -101,8 +101,8 @@ def get_musique_exemplaires_disponibles(conn, titre):
 
 def get_musique_ressources(conn, titre):
     query = f"""
-            SELECT * FROM MusiqueDetails
-            WHERE titre_musique LIKE '{titre}%'
+            SELECT * FROM Musique
+            WHERE titre LIKE '{titre}%'
     """
     results = execute_query(conn, query)
     return results
@@ -127,8 +127,8 @@ def get_livre_exemplaires_disponibles(conn, titre):
 
 def get_livre_ressources(conn,titre):
     query = f"""
-            SELECT * FROM LivreDetails
-            WHERE titre_livre LIKE '{titre}%'
+            SELECT * FROM Livre
+            WHERE titre LIKE '{titre}%'
     """
     results = execute_query(conn, query)
     return results
