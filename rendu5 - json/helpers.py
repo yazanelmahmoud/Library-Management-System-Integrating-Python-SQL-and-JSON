@@ -1345,7 +1345,7 @@ def check_credentials(conn, login, pwd):
         if is_personnel(conn, login):
             return "personnel"
         else:
-            statut = get_adherent_details(conn, login)[0][12]
+            statut = get_adherent_details(conn, login)[0][9]
             if statut == 'active':
                 return "adherent"
     return "non"
