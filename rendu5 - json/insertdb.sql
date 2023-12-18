@@ -1,4 +1,3 @@
-
 INSERT INTO Ressource (titre, dateApparition, editeur, genre, codeClassification, contributeur, exemplaires) VALUES
 ('Harry Potter à l''école des sorciers', '1997-06-26', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Chris Columbus", "acteur": "Daniel Radcliffe"}', '[{"id": 1, "etat": "Neuf"}, {"id": 2, "etat": "Bon"}, {"id": 3, "etat": "Abime"}]'),
 ('Harry Potter et la Chambre des secrets', '1998-07-02', 'Gallimard', 'Fantastique', 1, '{"auteur": "J.K. Rowling", "realisateur" :"Chris Columbus", "acteur": "Daniel Radcliffe"}', '[{"id": 4, "etat": "Neuf"}, {"id": 5, "etat": "Bon"}, {"id": 6, "etat": "Abime"}]'),
@@ -30,7 +29,7 @@ INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions) VAL
 (5, '0634434566', '2003-01-01', 'active', '[{"motif":"perte", "datePret": "2023-12-03","dateRetour": "2023-12-13"}, {"motif":"deterioration", "datePret":"2023-11-15", "dateRetour":"null"}]');
 
 
-SELECT prenom, nom, email, A->>'rue' AS Rue, A->>'numero' AS Numero, A->>'codePostal' AS Code_Postal, A->>'ville' AS Ville 
+SELECT prenom, nom, email, A->>'rue' AS Rue, CAST(A->>'numero' AS INTEGER) AS Numero, A->>'codePostal' AS Code_Postal, A->>'ville' AS Ville 
 FROM Utilisateur U, JSON_ARRAY_ELEMENT(U.Adresse) A;
 
 SELECT u.nom, u.prenom, a.statut, s->>'motif' AS Motif, s->>'datePret' AS Date_Pret, s->>'dateRetour' AS Date_Retour
