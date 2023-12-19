@@ -16,18 +16,18 @@ def get_user_input(prompt, data_type):
 def insert_into_pret(connection, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree) VALUES ({}, {}, {}, {}, {})").format(
-            sql.Literal(values['id_exemplaire']),
-            sql.Literal(values['id_adherent']),
-            sql.Literal(values['id_responsable']),
-            sql.Literal(values['datePret']),
-            sql.Literal(values['duree']),
+        insert_query = sql.SQL("INSERT INTO Adherent (numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({}, {}, {}, {}, {})").format(
+            sql.Literal(values['numeroTelephone']),
+            sql.Literal(values['dateNaissance']),
+            sql.Literal(values['statut']),
+            sql.Literal(values['sanctions']),
+            sql.Literal(values['prets']),
         )
         cursor.execute(insert_query)
         connection.commit()
-        print("Insertion réussie dans la table Pret")
+        print("Insertion réussie dans la table Adherent")
     except (Exception, psycopg2.Error) as error:
-        print("Erreur lors de l'insertion dans la table Pret:", error)
+        print("Erreur lors de l'insertion dans la table Adherent:", error)
     finally:
         if cursor:
             cursor.close()
