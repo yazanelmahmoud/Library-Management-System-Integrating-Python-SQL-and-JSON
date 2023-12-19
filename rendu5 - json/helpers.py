@@ -329,8 +329,8 @@ def display_exemplaires_prêt(conn, ressource, values):
     os.system('cls')
     # requête permettant d'ajouter un nouveau pret
     query = f"""
-            INSERT INTO Adherent (numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({values['numeroTelephone']}, {values['dateNaissance']}, {values['statut']}, {values['sanctions']}, {values['prets']})
-    """
+            INSERT INTO Adherent (datePret, dateRetour, etatRetour, duree, type, id_adherent, id_exemplaire)
+            """
     exemplaires = execute_query(conn, query)
     if len(exemplaires)>0:
         print("\nExemplaires :")
