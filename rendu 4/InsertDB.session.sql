@@ -1,3 +1,4 @@
+
 INSERT INTO Ressource (titre, dateApparition, editeur, genre, codeClassification)
 VALUES
     ('Book 1', '2023-01-01', 'Publisher A', 'Fiction', 101),
@@ -51,10 +52,10 @@ VALUES
 INSERT INTO Exemplaire (id_ressource, etat, disponible)
 VALUES
     (1, 'Neuf', true),
-    (1,'Bon', true),
-    (2,'Bon', false),
-    (3,'Abime', false),
-    (4,'Bon', false);
+    (1, 'Bon', true),
+    (2, 'Bon', false),
+    (3, 'Abime', false),
+    (4, 'Bon', false);
 
 INSERT INTO Adresse (rue, numero, codePostal, ville)
 VALUES
@@ -68,7 +69,8 @@ VALUES
 
 INSERT INTO Personnel (id)
 VALUES
-    (1);
+    (1),
+    (2);
 
 INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut)
 VALUES
@@ -77,8 +79,8 @@ VALUES
 
 INSERT INTO Pret (id_exemplaire, id_adherent, id_responsable, datePret, duree, dateRetour, etatRetour)
 VALUES
-    (1, 1, 2, '2023-01-10', 14, '2023-01-24', 'Bon'),
-    (2, 2, 1, '2023-02-15', 7, '2023-02-22', 'Neuf');
+    (1, 1, 1, '2023-01-10', 14, '2023-01-24', 'Bon'),
+    (2, 2, 2, '2023-02-15', 7, '2023-02-22', 'Neuf');
 
 INSERT INTO Sanction (id_adherent, DateSanction, DateFinSanction, motif, montant, paye)
 VALUES
