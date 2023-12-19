@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS Livre (
     ISBN VARCHAR(20) NOT NULL,
     resume TEXT,
     langue VARCHAR(50),
-    contributeur JSON NOT NULL,
-    exemplaires JSON NOT NULL
+    contributeur JSON,
+    exemplaires JSON
 );
 
 CREATE TABLE IF NOT EXISTS Musique (
@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS Musique (
     codeClassification INT NOT NULL,
     dureeMaxPret INT NOT NULL,
     longueur INT NOT NULL,
-    contributeur JSON NOT NULL,
-    exemplaires JSON NOT NULL
+    contributeur JSON,
+    exemplaires JSON
 );
 
 CREATE TABLE IF NOT EXISTS Film (
@@ -37,8 +37,8 @@ CREATE TABLE IF NOT EXISTS Film (
     langue VARCHAR(50) NOT NULL,
     length INT NOT NULL,
     synopsis TEXT,
-    contributeur JSON NOT NULL,
-    exemplaires JSON NOT NULL
+    contributeur JSON,
+    exemplaires JSON
 );
 
 CREATE TABLE IF NOT EXISTS Utilisateur (
@@ -91,6 +91,8 @@ SELECT
     U.adresse,
     P.numeroTelephone,
     P.dateNaissance,
-    P.statut
+    P.statut,
+    P.prets,
+    P.sanctions
 FROM Adherent P
 JOIN Utilisateur U ON P.id = U.id;

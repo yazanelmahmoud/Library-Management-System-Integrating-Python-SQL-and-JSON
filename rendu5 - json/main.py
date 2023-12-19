@@ -2,7 +2,7 @@ import os
 import psycopg2
 from constants import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER, ADMIN_PASSWORD
 
-from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, global_stats, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt, recommandations
+from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, global_stats, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt, recommandations, get_ressource_data, get_user_data
 
 # Search
 def option_1(conn,login):
@@ -17,21 +17,21 @@ def option_1(conn,login):
     print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
     print("=" * 90)
     for index, row in enumerate(livres):
-        print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[7], row[8]))
+        print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1][:14], row[8][:49], row[9]))
     print("=" * 90)
     print("\n")
     print("Films")
     print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
     print("=" * 90)
     for index, row in enumerate(films):
-        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[5], row[8]))
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1][:14], row[9][:49], row[7]))
     print("=" * 90)
     print("\n")
     print("Musiques")
     print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Editeur", "Longueur"))
     print("=" * 90)
     for index, row in enumerate(musiques):
-        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(musiques)+len(livres), row[1], row[3], row[6]))
+        print("{:<10} {:<15} {:<50} {:<10}".format(index+len(films)+len(livres), row[1][:14], row[3], row[6]))
     print("=" * 90)
     choice = int(input("Index de la ressource à consulter (-1 pour retour): "))
     if choice in range(-1, len(films)+len(musiques)+len(livres)):
@@ -39,7 +39,7 @@ def option_1(conn,login):
                 if choice < len(livres):
                     display_livre(conn,livres[choice])
                 elif choice >= len(livres) + len(films):
-                    display_musique(conn,musiques[choice-len(livres)-len(films)])
+                    display_musique(conn,musiques[choice-len(livres)-len(films)-3])
                 else:
                     display_film(conn,films[choice-len(livres)])
 
@@ -71,7 +71,7 @@ def option_adherent_1(conn,login):
     print("{:<10} {:<15}".format("Index", "Titre"))
     print("=" * 90)
     for index, row in enumerate(musiques):
-        print("{:<10} {:<15}".format(index+len(musiques)+len(livres), row[1]))
+        print("{:<10} {:<15}".format(index+len(films)+len(livres), row[1]))
     print("=" * 90)
     choice = int(input("Index de la ressource à consulter (-1 pour retour): "))
     if choice in range(-1, len(films)+len(musiques)+len(livres)):
@@ -79,7 +79,7 @@ def option_adherent_1(conn,login):
                 if choice < len(livres):
                     display_livre_adherent(conn,livres[choice])
                 elif choice >= len(livres) + len(films):
-                    display_musique_adherent(conn,musiques[choice-len(livres)-len(films)])
+                    display_musique_adherent(conn,musiques[choice-len(livres)-len(films)-3])
                 else:
                     display_film_adherent(conn,films[choice-len(livres)])
 
@@ -95,7 +95,9 @@ def option_3(conn,login_personnel):
     print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format("Index","Date prêt", "Durée", "Date retour", "Titre","Prenom", "Nom", "Login"))
     print("=" * 90)
     for index, row in enumerate(prêts):
-        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row[1], row[2], row[3],row[15],row[9],row[10], row[8]))
+        ressource_data = get_ressource_data(conn,row["idRessource"], row["type"])
+        user_data = get_user_data(conn,login)
+        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row["datePret"], row["dateRetour"], row["etatRetour"],ressource_data[1][:14],user_data[3],user_data[4], user_data[1]))
     print("=" * 90)
     print("\n")
     print("1. Ajouter un nouveau prêt")
@@ -115,7 +117,9 @@ def option_adherent_2(conn,login):
     print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format("Index","Date prêt", "Durée", "Date retour", "Titre","Prenom", "Nom", "Login"))
     print("=" * 90)
     for index, row in enumerate(prêts):
-        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row[1], row[2], row[3],row[15],row[9],row[10], row[8]))
+        ressource_data = get_ressource_data(conn,row["idRessource"], row["type"])
+        user_data = get_user_data(conn,login)
+        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row["datePret"], row["duree"], row["dateRetour"],ressource_data[1][:14],user_data[3],user_data[4], user_data[1]))
     print("=" * 90)
     print("\n")
     print("1. Retour")
@@ -372,13 +376,13 @@ def afficher_menu():
     print("\n=============== Menu Personnel ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
-    print("3. Gérer les prêts")
-    print("4. Gérer les sanctions")
-    print("5. Gérer les utilisateurs")
+    print("3. Gérer les prêts (à faire)")
+    print("4. Gérer les sanctions (à faire)")
+    print("5. Gérer les utilisateurs (à faire)")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
     print("8. Supprimer une table (Administrateur)")
-    print("9. Statistiques")
+    print("9. Statistiques (à faire)")
     print("10. Quitter")
     print("=============================================")
 
@@ -388,7 +392,7 @@ def afficher_menu_adherent():
     print("1. Recherche Livre / Musique / Film")
     print("2. Consulter ses prêts")
     print("3. Consulter ses sanctions")
-    print("4. Recommandations")
+    print("4. Recommandations (à faire)")
     print("5. Quitter")
     print("=============================================")
 
@@ -409,7 +413,7 @@ def choisir_option_adherent(conn,login):
     while True:
         afficher_menu_adherent()
         choice = input("Quel opération voulez-vous effectuer ? ")
-        if choice in ('1', '2', '3', '4','5'):
+        if choice in ('1', '2', '3','5'):
             if choice == '5':
                 print("Au revoir !")
                 break
