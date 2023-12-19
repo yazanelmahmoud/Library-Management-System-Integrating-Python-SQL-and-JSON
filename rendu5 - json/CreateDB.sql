@@ -80,7 +80,8 @@ SELECT
 FROM Personnel P
 JOIN Utilisateur U ON P.id = U.id;
 
-CREATE VIEW AdherentDetails AS
+-- View Pret de l'Adhérent
+CREATE VIEW PretAdherent AS
 SELECT
     U.id,
     U.login,
@@ -89,10 +90,29 @@ SELECT
     U.nom,
     U.email,
     U.adresse,
-    P.numeroTelephone,
-    P.dateNaissance,
-    P.statut,
-    P.prets,
-    P.sanctions
-FROM Adherent P
-JOIN Utilisateur U ON P.id = U.id;
+    A.numeroTelephone,
+    A.dateNaissance,
+    A.statut,
+    A.sanctions,
+    A.prets
+FROM Adherent A
+JOIN Utilisateur U ON A.id = U.id;
+
+
+CREATE VIEW FilmExemplaires AS
+SELECT
+    R.id_films,
+    R.titre,
+    R.dateApparition,
+    R.editeur,
+    R.genre,
+    R.codeClassification,
+    R.dureeMaxPret,
+    R.langue,
+    R.length,
+    R.synopsis,
+    R.contributeur,
+    E->>'id' AS id_exemplaire,
+    E->>'etat' AS etat_exemplaire
+FROM Film R
+JOIN JSON_ARRAY_ELEMENTS(R.exemplaires) E ON TRUE;

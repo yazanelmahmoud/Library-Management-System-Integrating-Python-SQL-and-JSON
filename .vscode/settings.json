@@ -6,8 +6,18 @@
       "port": 5432,
       "askForPassword": true,
       "driver": "PostgreSQL",
-      "name": "Nf18",
-      "database": "bibliotheque",
+      "name": "nf18",
+      "database": "library",
+      "username": "postgres"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "askForPassword": true,
+      "driver": "PostgreSQL",
+      "name": "nf18",
+      "database": "libraryJSON",
       "username": "postgres"
     }
   ]
