@@ -1224,7 +1224,8 @@ def choose_table(conn):
             values['ISBN'] = input("Entrez le code ISBN du livre : ")
             values['resume'] = input("Entrez le résumé du livre : ")
             values['langue'] = input("Entrez la langue du livre : ")
-    # ...
+            id = insert_ressource(conn, values)
+            insert_livre(conn,values, id)
 
     elif table_choice == 2:  # Si la table est Musique
         values['titre'] = input("Entrez le titre de la ressource : ")
@@ -1233,6 +1234,8 @@ def choose_table(conn):
         values['genre'] = input("Entrez le genre de la ressource : ")
         values['codeClassification'] = get_user_input("Entrez le code de classification de la ressource : ", int)
         values['longueur'] = get_user_input("Entrez la longueur de la musique (en secondes) : ", int)
+        id = insert_ressource(conn, values)
+        insert_musique(conn,values, id)
 
     elif table_choice == 3:  # Si la table est Film
         values['titre'] = input("Entrez le titre de la ressource : ")
@@ -1243,6 +1246,8 @@ def choose_table(conn):
         values['langue'] = input("Entrez la langue du film : ")
         values['length'] = get_user_input("Entrez la durée du film (en minutes) : ", int)
         values['synopsis'] = input("Entrez le synopsis du film : ")
+        id = insert_ressource(conn, values)
+        insert_film(conn,values, id)
 
 def get_active_sanctions_from_login(conn,login):
     query = f"""
@@ -1388,3 +1393,52 @@ def recommandations(conn, login):
                     print("{:<15}".format(result[0]))
         print("\n1. Retour")
         choice = input("Que voulez_vous faire ? : ")
+
+def insert_livre(conn, values, id):
+    insert_query = sql.SQL("INSERT INTO Livre (id_livre,ISBN, resume, langue) VALUES ({}, {}, {}, {})").format(
+            sql.Literal(id),
+            sql.Literal(values['ISBN']),
+            sql.Literal(values['resume']),
+            sql.Literal(values['langue'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
+
+def insert_musique(conn, values, id):
+    insert_query = sql.SQL("INSERT INTO Musique (id_musique, longueur) VALUES ({}, {})").format(
+            sql.Literal(id),
+            sql.Literal(values['longueur'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
+
+def insert_film(conn, values, id):
+    insert_query = sql.SQL("INSERT INTO Film (id_film, langue, length, synopsis) VALUES ({}, {}, {}, {})").format(
+            sql.Literal(id),
+            sql.Literal(values['langue']),
+            sql.Literal(values['length']),
+            sql.Literal(values['synopsis'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
+
+def insert_ressource(conn, values):
+    insert_query = sql.SQL("INSERT INTO Ressource (titre, dateApparition, editeur, genre, codeClassification) VALUES ({}, {}, {}, {}, {}) RETURNING id;").format(
+            sql.Literal(values['titre']),
+            sql.Literal(values['dateApparition']),
+            sql.Literal(values['editeur']),
+            sql.Literal(values['genre']),
+            sql.Literal(values['codeClassification'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    id = cursor.fetchone()[0]
+    conn.commit()
+    cursor.close()
+    return id
