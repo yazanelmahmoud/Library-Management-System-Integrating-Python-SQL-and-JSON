@@ -60,8 +60,8 @@ def get_prets_en_cours_from_login(conn, login):
 
 def get_film_exemplaires(conn, titre):
     query = f"""
-            SELECT * FROM FilmExemplaires
-            WHERE titre_film LIKE '{titre}%'
+            SELECT * FROM Film
+            WHERE titre LIKE '{titre}%'
     """
     results = execute_query(conn, query)
     return results
@@ -84,12 +84,14 @@ def get_user_data(conn,login):
 
 def get_film_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT id_film, titre_film, synopsis, langue , COUNT(id_film) FROM FilmExemplaires
-            WHERE titre_film LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
-            GROUP BY id_film, titre_film, synopsis, langue
-            HAVING COUNT(id_film) >0
-    """
+            SELECT  COUNT(f.id),f.titre, f.synopsis, f.langue
+            FROM Film f, JSON_ARRAY_ELEMENTS(f.exemplaires) e
+            WHERE titre LIKE '{titre}%' AND e->>'disponible' = 'true' AND e->>'etat' != 'Perdu'
+            GROUP BY f.titre, f.synopsis, f.langue
+            HAVING COUNT(f.id) >0
+            """
     results = execute_query(conn, query)
+    print(results)
     return results
 
 def get_film_ressources(conn, titre):
@@ -102,7 +104,7 @@ def get_film_ressources(conn, titre):
 
 def get_musique_exemplaires(conn, titre):
     query = f"""
-            SELECT * FROM MusiqueExemplaires
+            SELECT * FROM Musique
             WHERE titre_musique LIKE '{titre}%'
     """
     results = execute_query(conn, query)
@@ -110,10 +112,11 @@ def get_musique_exemplaires(conn, titre):
 
 def get_musique_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT id_musique, titre_musique, editeur, longueur , COUNT(id_musique) FROM musiqueExemplaires
-            WHERE titre_musique LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
-            GROUP BY id_musique, titre_musique, editeur, longueur
-            HAVING COUNT(id_musique) >0
+            SELECT COUNT(m.id), m.titre, m.editeur, m.longueur 
+            FROM Musique m, JSON_ARRAY_ELEMENTS(m.exemplaires) e
+            WHERE m.titre LIKE '{titre}%' AND e->>'disponible' = 'true' AND e->>'etat' != 'Perdu'
+            GROUP BY m.titre, m.editeur, m.longueur
+            HAVING COUNT(m.id) >0
     """
     results = execute_query(conn, query)
     return results
@@ -128,7 +131,7 @@ def get_musique_ressources(conn, titre):
 
 def get_livre_exemplaires(conn, titre):
     query = f"""
-            SELECT * FROM LivreExemplaires
+            SELECT * FROM Livre
             WHERE titre_livre LIKE '{titre}%'
     """
     results = execute_query(conn, query)
@@ -136,10 +139,11 @@ def get_livre_exemplaires(conn, titre):
 
 def get_livre_exemplaires_disponibles(conn, titre):
     query = f"""
-            SELECT id_livre, titre_livre, editeur, langue , COUNT(id_livre) FROM livreExemplaires
-            WHERE titre_livre LIKE '{titre}%' AND disponible = 'true' AND etat != 'Perdu'
-            GROUP BY id_livre, titre_livre, editeur, langue
-            HAVING COUNT(id_livre) >0
+            SELECT COUNT(l.id), l.titre, l.resume, l.langue
+            FROM Livre l, JSON_ARRAY_ELEMENTS(l.exemplaires) e
+            WHERE l.titre LIKE '{titre}%' AND e->>'disponible' = 'true' AND e->>'etat' != 'Perdu'
+            GROUP BY l.titre, l.resume, l.langue
+            HAVING COUNT(l.id) >0
     """
     results = execute_query(conn, query)
     return results
@@ -323,9 +327,9 @@ def display_exemplaires_adherent(conn, ressource, type):
  
 def display_exemplaires_prêt(conn, ressource, values):
     os.system('cls')
+    # requête permettant d'ajouter un nouveau pret
     query = f"""
-            SELECT * FROM Exemplaire
-            WHERE id_ressource = {ressource[0]} AND disponible = 'true' AND etat != 'Perdu'
+            INSERT INTO Adherent (numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({values['numeroTelephone']}, {values['dateNaissance']}, {values['statut']}, {values['sanctions']}, {values['prets']})
     """
     exemplaires = execute_query(conn, query)
     if len(exemplaires)>0:
@@ -791,16 +795,11 @@ def insert_realisateur(conn, film):
     execute_query(conn,query)
 
 def display_prêts(conn,prêt):
-    print(f"Date prêt: {prêt[1]}")
-    print(f"Durée: {prêt[2]}")
-    print(f"Etat: {prêt[13]}")
-    print(f"Date retour: {prêt[3]}")
-    print(f"Etat retour: {prêt[4]}")
-    print(f"Titre ressource: {prêt[15]}")
-    print(f"Tel: {prêt[5]}")
-    print(f"Login: {prêt[8]}")
-    print(f"Prenom: {prêt[9]}")
-    print(f"Nom: {prêt[10]}")
+    print(f"Date prêt: {prêt['datePret']}")
+    print(f"Date retour: {prêt['dateRetour']}")
+    print(f"Etat retour: {prêt['etatRetour']}")
+    print(f"Durée: {prêt['duree']}")
+    print(f"Type: {prêt['type']}")
     print("\n")
     print("1. Enregister le rendu du prêt")
     print("2. Supprimer le prêt")
@@ -1143,14 +1142,14 @@ def insert_prêt(conn,login):
             musiques = get_musique_exemplaires_disponibles(conn, title)
             livres = get_livre_exemplaires_disponibles(conn, title)
             print("Livres")
-            print("{:<10} {:<15} {:<50} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
+            print("{:<10} {:<15} {:<70} {:<15}".format("Index", "Titre", "Résumé", "Langue"))
             print("=" * 90)
             for index, row in enumerate(livres):
-                print("{:<10} {:<15} {:<50} {:<15}".format(index, row[1], row[2], row[3]))
+                print("{:<10} {:<15} {:<70} {:<15}".format(index, row[1], row[2], row[3]))
             print("=" * 90)
             print("\n")
             print("Films")
-            print("{:<10} {:<15} {:<50} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
+            print("{:<10} {:<15} {:<70} {:<10}".format("Index", "Titre", "Synopsis", "Langue"))
             print("=" * 90)
             for index, row in enumerate(films):
                 print("{:<10} {:<15} {:<50} {:<10}".format(index+len(livres), row[1], row[2], row[3]))
