@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import json
 import os
 import psycopg2
 from psycopg2 import sql
@@ -35,7 +36,7 @@ def execute_query(conn, query):
     # Open a cursor to perform database operations
     cur = conn.cursor()
     # Execute a command: create datacamp_courses table
-    cur.execute(query)
+    cur.execute(query)  
     # Get results if results exist
     try:
         rows = cur.fetchall()
@@ -49,11 +50,13 @@ def execute_query(conn, query):
 
 def get_prets_en_cours_from_login(conn, login):
     query = f"""
-            SELECT * FROM PretDetails
-            WHERE login LIKE '{login}%' AND dateretour IS NULL
+            SELECT prets FROM AdherentDetails
+            WHERE login LIKE '{login}%' AND prets->'dateRetour' IS NULL
     """
     results = execute_query(conn, query)
-    return results
+    if len(results) >0:
+        return results[0][0]
+    return None
 
 def get_film_exemplaires(conn, titre):
     query = f"""
@@ -62,6 +65,22 @@ def get_film_exemplaires(conn, titre):
     """
     results = execute_query(conn, query)
     return results
+
+def get_ressource_data(conn,id, type):
+    query = f"""
+            SELECT * FROM {type}
+            WHERE id = {id}
+    """
+    results = execute_query(conn, query)
+    return results[0]
+
+def get_user_data(conn,login):
+    query = f"""
+            SELECT * FROM Utilisateur
+            WHERE login LIKE '{login}%'
+    """
+    results = execute_query(conn, query)
+    return results[0]
 
 def get_film_exemplaires_disponibles(conn, titre):
     query = f"""
@@ -156,84 +175,124 @@ def is_personnel(conn, login):
 
 def get_auteurs_livre(conn, id_livre):
     query = f"""
-            SELECT * FROM AuteurDetails
-            WHERE id_livre = {id_livre}
+            SELECT contributeur->'auteur' FROM Livre
+            WHERE id = {id_livre}
     """
     results = execute_query(conn, query)
-    return results
+    if len(results) >0:
+        author_list_json = results[0][0]
+        return author_list_json
+    return None
 
 def get_interpretes_musique(conn, id_musique):
     query = f"""
-            SELECT * FROM InterpreteDetails
-            WHERE id_musique = {id_musique}
+            SELECT contributeur->'interprete' FROM Musique
+            WHERE id = {id_musique}
     """
     results = execute_query(conn, query)
+    if len(results) >0:
+        interprete_list_json = results[0][0]
+        return interprete_list_json
     return results
 
 def get_compositeurs_musique(conn, id_musique):
     query = f"""
-            SELECT * FROM CompositeurDetails
-            WHERE id_musique = {id_musique}
+            SELECT contributeur->'compositeur' FROM Musique
+            WHERE id = {id_musique}
     """
     results = execute_query(conn, query)
+    if len(results) >0:
+        compositor_list_json = results[0][0]
+        return compositor_list_json
     return results
 
 def get_acteurs_film(conn, id_film):
     query = f"""
-            SELECT * FROM ActeurDetails
-            WHERE id_film = {id_film}
+            SELECT contributeur->'acteur' FROM Film
+            WHERE id = {id_film}
     """
     results = execute_query(conn, query)
+    if len(results) >0:
+        actor_list_json = results[0][0]
+        return actor_list_json
     return results
 
 def get_realisateurs_film(conn, id_film):
     query = f"""
-            SELECT * FROM RealisateurDetails
-            WHERE id_film = {id_film}
+            SELECT contributeur->'realisateur' FROM Film
+            WHERE id = {id_film}
     """
     results = execute_query(conn, query)
+    if len(results) >0:
+        director_list_json = results[0][0]
+        return director_list_json
     return results
 
 def insert_exemplaire(conn, ressource, type):
     os.system('cls')
     etat = input("Etat de l'exemplaire 'Neuf', 'Bon', 'Abime', 'Perdu' : ")
-    query = f"""INSERT INTO Exemplaire (id_ressource, etat, disponible)
-            VALUES ('{ressource[0]}', '{etat}', true);"""
+    exemplaires = ressource[9]
+    if type == "Livre":
+        exemplaires = ressource[9]
+    if type == "Film":
+        exemplaires = ressource[11]
+    exemplaires.append({"id": len(exemplaires)+1, "etat": etat})
+    query = f"""
+        UPDATE {type}
+        SET exemplaires = '{json.dumps(exemplaires)}'
+        WHERE id = {ressource[0]};
+        """
     execute_query(conn,query)
     display_exemplaires(conn, ressource, type)
 
 def delete_exemplaire(conn, ressource, type):
-    id = input("Id de l'exemplaire : ")
-    delete_exemplaire_from_id(conn, id)
+    id = input("Index de l'exemplaire : ")
+    delete_exemplaire_from_id(conn, ressource, type, id)
     display_exemplaires(conn, ressource, type)
 
-def delete_exemplaire_from_id(conn, id):
-    query = f"""DELETE FROM Exemplaire WHERE id = {id}"""
+def delete_exemplaire_from_id(conn, ressource, type, id):
+    exemplaires = ressource[9]
+    if type == "Livre":
+        exemplaires = ressource[9]
+    if type == "Film":
+        exemplaires = ressource[11]
+    exemplaires.pop(int(id)-1)
+    query = f"""
+        UPDATE {type}
+        SET exemplaires = '{json.dumps(exemplaires)}'
+        WHERE id = {ressource[0]};
+        """
     execute_query(conn,query)
 
+
 def update_exemplaire(conn, ressource, type):
-    id = input("Id de l'exemplaire : ")
+    id = input("Index de l'exemplaire : ")
     etat = input("Etat de l'exemplaire 'Neuf', 'Bon', 'Abime', 'Perdu' : ")
-    disponible = input("Disponible ? (true: disponible, false: non disponible) : ")
+    exemplaires = ressource[9]
+    if type == "Livre":
+        exemplaires = ressource[9]
+    if type == "Film":
+        exemplaires = ressource[11]
+    exemplaires[int(id)-1] = {"id": exemplaires[int(id)-1]["id"], "etat": etat}
     query = f"""
-    UPDATE Exemplaire
-    SET etat = '{etat}', disponible = '{disponible}'
-    WHERE id = '{id}';
-    """
+        UPDATE {type}
+        SET exemplaires = '{json.dumps(exemplaires)}'
+        WHERE id = {ressource[0]};
+        """
     execute_query(conn,query)
     display_exemplaires(conn, ressource, type)
 
 def display_exemplaires(conn, ressource, type):
     os.system('cls')
     query = f"""
-            SELECT * FROM Exemplaire
-            WHERE id_ressource = {ressource[0]}
+            SELECT exemplaires FROM {type}
+            WHERE id = {ressource[0]}
     """
-    exemplaires = execute_query(conn, query)
+    exemplaires = execute_query(conn, query)[0][0]
     if len(exemplaires)>0:
         print("\nExemplaires :")
         for exemplaire in exemplaires:
-            print("{:<10} {:<15} {:<15}".format(exemplaire[0], exemplaire[2], "disponible" if exemplaire[3] == 1 else "non disponible"))
+            print("{:<10} {:<15}".format(exemplaire["id"], exemplaire["etat"]))
     print("\n1. Ajouter Exemplaire")
     print("2. Modifier Exemplaire")
     print("3. Supprimer Exemplaire")
@@ -245,19 +304,19 @@ def display_exemplaires(conn, ressource, type):
         update_exemplaire(conn, ressource, type)
     elif choice == 3:
         delete_exemplaire(conn, ressource, type)
-    globals()[f'display_{type}'](conn, ressource)
+    globals()[f'display_{type.lower()}'](conn, ressource)
 
 def display_exemplaires_adherent(conn, ressource, type):
     os.system('cls')
     query = f"""
-            SELECT * FROM Exemplaire
-            WHERE id_ressource = {ressource[0]}
+            SELECT exemplaires FROM {type}
+            WHERE id = {ressource[0]}
     """
-    exemplaires = execute_query(conn, query)
+    exemplaires = execute_query(conn, query)[0][0]
     if len(exemplaires)>0:
         print("\nExemplaires :")
         for exemplaire in exemplaires:
-            print("{:<10} {:<15} {:<15}".format(exemplaire[0], exemplaire[2], "disponible" if exemplaire[3] == 1 else "non disponible"))
+            print("{:<10} {:<15}".format(exemplaire["id"], exemplaire["etat"]))
     print("1. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     globals()[f'display_{type}_adherent'](conn, ressource)
@@ -290,9 +349,9 @@ def emprunt_exemplaire(conn,id_exemplaire):
     """
     _ = execute_query(conn, query)
 
-def delete_ressource(conn, id_ressource):
+def delete_ressource(conn, id_ressource, type):
     query = f"""
-            DELETE FROM ressource WHERE id = {id_ressource};
+            DELETE FROM {type} WHERE id = {id_ressource};
     """
     _ = execute_query(conn, query)
 
@@ -303,14 +362,14 @@ def display_livre(conn,livre):
     print(f"Editeur: {livre[3]}")
     print(f"Genre: {livre[4]}")
     print(f"Code de classification: {livre[5]}")
-    print(f"ISBN: {livre[6]}")
-    print(f"Résumé: {livre[7]}")
-    print(f"Langue: {livre[8]}")
+    print(f"ISBN: {livre[7]}")
+    print(f"Résumé: {livre[8]}")
+    print(f"Langue: {livre[9]}")
     auteurs = get_auteurs_livre(conn,livre[0])
     if len(auteurs)>0:
         print("\nAuteurs :")
         for auteur in auteurs:
-            print("{:<10} {:<15} {} {:<15}".format(auteur[1], auteur[2], auteur[3], auteur[4]))
+            print("{:<10} {:<15} {:<15} {:<15}".format(auteur["prenom"], auteur["nom"], auteur["dateNaissance"], auteur["nationalite"]))
     print("\n")
     print("1. Modifier la ressource")
     print("2. Supprimer la ressource")
@@ -318,11 +377,11 @@ def display_livre(conn,livre):
     print("4. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==2: 
-        delete_ressource(conn, livre[0])
+        delete_ressource(conn, livre[0], "Livre")
     elif choice ==1: 
         update_livre(conn, livre)
     elif choice ==3: 
-        display_exemplaires(conn, livre,"livre")
+        display_exemplaires(conn, livre,"Livre")
 
 def display_musique(conn,musique):
     os.system('cls')
@@ -336,12 +395,12 @@ def display_musique(conn,musique):
     if len(interpretes)>0:
         print("\nInterpretes :")
         for interprete in interpretes:
-            print("{:<10} {:<15} {} {:<15}".format(interprete[1], interprete[2], interprete[3], interprete[4]))
+            print("{:<10} {:<15} {} {:<15}".format(interprete["prenom"], interprete["nom"], interprete["dateNaissance"], interprete["nationalite"]))
     compositeurs = get_compositeurs_musique(conn,musique[0])
     if len(compositeurs)>0:
         print("Compositeurs :")
         for compositeur in compositeurs:
-            print("{:<10} {:<15} {} {:<15}".format(compositeur[1], compositeur[2], compositeur[3], compositeur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(compositeur["prenom"], compositeur["nom"], compositeur["dateNaissance"], compositeur["nationalite"]))
     print("\n")
     print("1. Modifier la ressource")
     print("2. Supprimer la ressource")
@@ -349,11 +408,11 @@ def display_musique(conn,musique):
     print("4. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==2: 
-        delete_ressource(conn, musique[0])
+        delete_ressource(conn, musique[0], "Musique")
     elif choice ==1: 
         update_musique(conn, musique)
     elif choice ==3: 
-        display_exemplaires(conn, musique, "musique")
+        display_exemplaires(conn, musique, "Musique")
 
 def display_film(conn,film):
     os.system('cls')
@@ -363,18 +422,18 @@ def display_film(conn,film):
     print(f"Genre: {film[4]}")
     print(f"Synopsis: {film[5]}")
     print(f"Code de classification: {film[6]}")
-    print(f"Durée: {film[7]}")
-    print(f"Langue: {film[8]}")
+    print(f"Durée: {film[8]}")
+    print(f"Langue: {film[7]}")
     acteurs = get_acteurs_film(conn,film[0])
     if len(acteurs)>0:
         print("\nActeurs :")
         for acteur in acteurs:
-            print("{:<10} {:<15} {} {:<15}".format(acteur[1], acteur[2], acteur[3], acteur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(acteur["prenom"], acteur["nom"], acteur["dateNaissance"], acteur["nationalite"]))
     realisateurs = get_realisateurs_film(conn,film[0])
     if len(realisateurs)>0:
         print("Realisateurs :")
         for realisateur in realisateurs:
-            print("{:<10} {:<15} {} {:<15}".format(realisateur[1], realisateur[2], realisateur[3], realisateur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(realisateur["prenom"], realisateur["nom"], realisateur["dateNaissance"], realisateur["nationalite"]))
     print("\n")
     print("1. Modifier la ressource")
     print("2. Supprimer la ressource")
@@ -382,11 +441,11 @@ def display_film(conn,film):
     print("4. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==2: 
-        delete_ressource(conn, film[0])
+        delete_ressource(conn, film[0], "Musique")
     elif choice ==1: 
         update_film(conn, film)
     elif choice ==3: 
-        display_exemplaires(conn, film, "film")
+        display_exemplaires(conn, film, "Film")
 
 def display_livre_adherent(conn,livre):
     os.system('cls')
@@ -395,20 +454,20 @@ def display_livre_adherent(conn,livre):
     print(f"Editeur: {livre[3]}")
     print(f"Genre: {livre[4]}")
     print(f"Code de classification: {livre[5]}")
-    print(f"ISBN: {livre[6]}")
-    print(f"Résumé: {livre[7]}")
-    print(f"Langue: {livre[8]}")
+    print(f"ISBN: {livre[7]}")
+    print(f"Résumé: {livre[8]}")
+    print(f"Langue: {livre[9]}")
     auteurs = get_auteurs_livre(conn,livre[0])
     if len(auteurs)>0:
         print("\nAuteurs :")
         for auteur in auteurs:
-            print("{:<10} {:<15} {} {:<15}".format(auteur[1], auteur[2], auteur[3], auteur[4]))
+            print("{:<10} {:<15} {:<15} {:<15}".format(auteur["prenom"], auteur["nom"], auteur["dateNaissance"], auteur["nationalite"]))
     print("\n")
     print("1. Consulter les exemplaires")
     print("2. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==1: 
-        display_exemplaires_adherent(conn, livre,"livre")
+        display_exemplaires_adherent(conn, livre,"Livre")
 
 def display_musique_adherent(conn,musique):
     os.system('cls')
@@ -422,18 +481,18 @@ def display_musique_adherent(conn,musique):
     if len(interpretes)>0:
         print("\nInterpretes :")
         for interprete in interpretes:
-            print("{:<10} {:<15} {} {:<15}".format(interprete[1], interprete[2], interprete[3], interprete[4]))
+            print("{:<10} {:<15} {} {:<15}".format(interprete["prenom"], interprete["nom"], interprete["dateNaissance"], interprete["nationalite"]))
     compositeurs = get_compositeurs_musique(conn,musique[0])
     if len(compositeurs)>0:
         print("Compositeurs :")
         for compositeur in compositeurs:
-            print("{:<10} {:<15} {} {:<15}".format(compositeur[1], compositeur[2], compositeur[3], compositeur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(compositeur["prenom"], compositeur["nom"], compositeur["dateNaissance"], compositeur["nationalite"]))
     print("\n")
     print("1. Consulter les exemplaires")
     print("2. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==1: 
-        display_exemplaires_adherent(conn, musique, "musique")
+        display_exemplaires_adherent(conn, musique, "Musique")
 
 def display_film_adherent(conn,film):
     os.system('cls')
@@ -443,24 +502,24 @@ def display_film_adherent(conn,film):
     print(f"Genre: {film[4]}")
     print(f"Synopsis: {film[5]}")
     print(f"Code de classification: {film[6]}")
-    print(f"Durée: {film[7]}")
-    print(f"Langue: {film[8]}")
+    print(f"Durée: {film[8]}")
+    print(f"Langue: {film[7]}")
     acteurs = get_acteurs_film(conn,film[0])
     if len(acteurs)>0:
         print("\nActeurs :")
         for acteur in acteurs:
-            print("{:<10} {:<15} {} {:<15}".format(acteur[1], acteur[2], acteur[3], acteur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(acteur["prenom"], acteur["nom"], acteur["dateNaissance"], acteur["nationalite"]))
     realisateurs = get_realisateurs_film(conn,film[0])
     if len(realisateurs)>0:
         print("Realisateurs :")
         for realisateur in realisateurs:
-            print("{:<10} {:<15} {} {:<15}".format(realisateur[1], realisateur[2], realisateur[3], realisateur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(realisateur["prenom"], realisateur["nom"], realisateur["dateNaissance"], realisateur["nationalite"]))
     print("\n")
     print("1. Consulter les exemplaires")
     print("2. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==1: 
-        display_exemplaires_adherent(conn, film, "film")
+        display_exemplaires_adherent(conn, film, "Film")
 
 def update_livre(conn, livre):
     os.system('cls')
@@ -474,28 +533,19 @@ def update_livre(conn, livre):
     langue = input("Langue: ")
     try:
         query1 = f"""
-        UPDATE Ressource
-        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}'
+        UPDATE Livre
+        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}', resume = '{resume}', ISBN = '{isbn}', langue = '{langue}'
         WHERE id = '{livre[0]}';
         """
         execute_query(conn,query1)
-    except:
-        print("\n")
-    try:
-        query2 = f"""
-        UPDATE Livre
-        SET resume = '{resume}', ISBN = '{isbn}', langue = '{langue}'
-        WHERE id_livre = '{livre[0]}';
-        """
-        execute_query(conn,query2)
     except:
         print("\n")
     os.system('cls')
     auteurs = get_auteurs_livre(conn,livre[0])
     if len(auteurs)>0:
         print("\nAuteurs :")
-        for auteur in auteurs:
-            print("{:<10} {:<10} {:<15} {} {:<15}".format(auteur[5],auteur[1], auteur[2], auteur[3], auteur[4]))
+        for index, auteur in enumerate(auteurs):
+            print("{:<10} {:<10} {:<15} {} {:<15}".format(index+1,auteur["prenom"], auteur["nom"], auteur["dateNaissance"], auteur["nationalite"]))
         print("\n1. Ajouter Auteur")
         print("2. Supprimer Auteur")
         print("3. Finir")
@@ -509,10 +559,13 @@ def update_livre(conn, livre):
                 break
 
 def delete_auteur(conn, livre):
-    id = input("Id de l'auteur : ")
+    id = input("Index de l'auteur : ")
+    contributeurs = livre[10]
+    contributeurs["auteur"].pop(int(id)-1)
     query = f"""
-        DELETE FROM Auteur
-        WHERE id_contributeur = '{id}' AND id_livre = '{livre[0]}'
+        UPDATE Livre
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {livre[0]};
         """
     execute_query(conn,query)
 
@@ -521,29 +574,14 @@ def insert_auteur(conn, livre):
     prenom = input("Prenom de l'auteur: ")
     date_naissance = input("Date de naissance: ")
     nationalite = input("Nationalité: ")
+    contributeurs = livre[10]
+    contributeurs["auteur"].append({"nom": nom, "prenom": prenom, "dateNaissance": date_naissance, "nationalite": nationalite})
     query = f"""
-        SELECT * FROM AuteurDetails
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}' AND id_livre = '{livre[0]}'
+        UPDATE Livre
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {livre[0]};
         """
-    results = execute_query(conn,query)
-    if len(results)==0:
-        query = f"""
-        SELECT * FROM Contributeur
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-        """
-        results = execute_query(conn,query)
-        if len(results)==0:
-            query = f"""INSERT INTO Contributeur (prenom, nom, datenaissance,nationalite)
-            VALUES ('{prenom}', '{nom}', '{date_naissance}', '{nationalite}');"""
-            execute_query(conn,query)
-            query = f"""
-            SELECT * FROM Contributeur
-            WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-            """
-            results = execute_query(conn,query)
-        query = f"""INSERT INTO Auteur (id_livre, id_contributeur)
-        VALUES ('{livre[0]}', '{results[0][0]}');"""
-        execute_query(conn,query)
+    execute_query(conn,query)
 
 def update_musique(conn, musique):
     os.system('cls')
@@ -555,20 +593,11 @@ def update_musique(conn, musique):
     code= input("Code de classification: ")
     try:
         query1 = f"""
-        UPDATE Ressource
-        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}'
+        UPDATE Musique
+        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}', longueur = '{longueur}'
         WHERE id = '{musique[0]}';
         """
         execute_query(conn,query1)
-    except:
-        print("\n")
-    try:
-        query2 = f"""
-        UPDATE musique
-        SET longueur = '{longueur}'
-        WHERE id_musique = '{musique[0]}';
-        """
-        execute_query(conn,query2)
     except:
         print("\n")
     os.system('cls')
@@ -576,7 +605,7 @@ def update_musique(conn, musique):
     if len(interpretes)>0:
         print("\nInterpretes :")
         for interprete in interpretes:
-            print("{:<10} {:<10} {:<15} {} {:<15}".format(interprete[5],interprete[1], interprete[2], interprete[3], interprete[4]))
+            print("{:<10} {:<15} {} {:<15}".format(interprete["prenom"], interprete["nom"], interprete["dateNaissance"], interprete["nationalite"]))
         print("\n1. Ajouter Interprete")
         print("2. Supprimer Interprete")
         print("3. Continuer")
@@ -593,7 +622,7 @@ def update_musique(conn, musique):
     if len(compositeurs)>0:
         print("\nCompositeurs :")
         for compositeur in compositeurs:
-            print("{:<10} {:<10} {:<15} {} {:<15}".format(compositeur[5],compositeur[1], compositeur[2], compositeur[3], compositeur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(compositeur["prenom"], compositeur["nom"], compositeur["dateNaissance"], compositeur["nationalite"]))
         print("\n1. Ajouter Compositeur")
         print("2. Supprimer Compositeur")
         print("3. Finir")
@@ -607,10 +636,13 @@ def update_musique(conn, musique):
                 break
 
 def delete_compositeur(conn, musique):
-    id = input("Id du compositeur : ")
+    id = input("Index du compositeur : ")
+    contributeurs = musique[8]
+    contributeurs["compositeur"].pop(int(id)-1)
     query = f"""
-        DELETE FROM Compositeur
-        WHERE id_contributeur = '{id}' AND id_musique = '{musique[0]}'
+        UPDATE Musique
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {musique[0]};
         """
     execute_query(conn,query)
 
@@ -619,35 +651,23 @@ def insert_compositeur(conn, musique):
     prenom = input("Prenom du compositeur: ")
     date_naissance = input("Date de naissance: ")
     nationalite = input("Nationalité: ")
+    contributeurs = musique[8]
+    contributeurs["compositeur"].append({"nom": nom, "prenom": prenom, "dateNaissance": date_naissance, "nationalite": nationalite})
     query = f"""
-        SELECT * FROM CompositeurDetails
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}' AND id_musique = '{musique[0]}'
+        UPDATE Musique
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {musique[0]};
         """
-    results = execute_query(conn,query)
-    if len(results)==0:
-        query = f"""
-        SELECT * FROM Contributeur
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-        """
-        results = execute_query(conn,query)
-        if len(results)==0:
-            query = f"""INSERT INTO Contributeur (prenom, nom, datenaissance,nationalite)
-            VALUES ('{prenom}', '{nom}', '{date_naissance}', '{nationalite}');"""
-            execute_query(conn,query)
-            query = f"""
-            SELECT * FROM Contributeur
-            WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-            """
-            results = execute_query(conn,query)
-        query = f"""INSERT INTO Compositeur (id_musique, id_contributeur)
-        VALUES ('{musique[0]}', '{results[0][0]}');"""
-        execute_query(conn,query)
+    execute_query(conn,query)
 
 def delete_interprete(conn, musique):
-    id = input("Id de l'interprete : ")
+    id = input("Index de l'interprete : ")
+    contributeurs = musique[8]
+    contributeurs["interprete"].pop(int(id)-1)
     query = f"""
-        DELETE FROM interprete
-        WHERE id_contributeur = '{id}' AND id_musique = '{musique[0]}'
+        UPDATE Musique
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {musique[0]};
         """
     execute_query(conn,query)
 
@@ -656,29 +676,15 @@ def insert_interprete(conn, musique):
     prenom = input("Prenom de l'interprete: ")
     date_naissance = input("Date de naissance: ")
     nationalite = input("Nationalité: ")
+    contributeurs = musique[8]
+    contributeurs["interprete"].append({"nom": nom, "prenom": prenom, "dateNaissance": date_naissance, "nationalite": nationalite})
     query = f"""
-        SELECT * FROM interpreteDetails
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}' AND id_musique = '{musique[0]}'
+        UPDATE Musique
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {musique[0]};
         """
-    results = execute_query(conn,query)
-    if len(results)==0:
-        query = f"""
-        SELECT * FROM Contributeur
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-        """
-        results = execute_query(conn,query)
-        if len(results)==0:
-            query = f"""INSERT INTO Contributeur (prenom, nom, datenaissance,nationalite)
-            VALUES ('{prenom}', '{nom}', '{date_naissance}', '{nationalite}');"""
-            execute_query(conn,query)
-            query = f"""
-            SELECT * FROM Contributeur
-            WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-            """
-            results = execute_query(conn,query)
-        query = f"""INSERT INTO interprete (id_musique, id_contributeur)
-        VALUES ('{musique[0]}', '{results[0][0]}');"""
-        execute_query(conn,query)
+    execute_query(conn,query)
+
 
 def update_film(conn, film):
     os.system('cls')
@@ -693,19 +699,10 @@ def update_film(conn, film):
     try:
         query1 = f"""
         UPDATE Ressource
-        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}'
+        SET titre = '{titre}', dateApparition = '{date}', editeur = '{editeur}', genre = '{genre}', codeClassification = '{code}', length = '{length}', langue = '{langue}', synopsis='{synopsis}'
         WHERE id = '{film[0]}';
         """
         execute_query(conn,query1)
-    except:
-        print("\n")
-    try:
-        query2 = f"""
-        UPDATE film
-        SET length = '{length}', langue = '{langue}', synopsis='{synopsis}'
-        WHERE id_film = '{film[0]}';
-        """
-        execute_query(conn,query2)
     except:
         print("\n")
     os.system('cls')
@@ -713,7 +710,7 @@ def update_film(conn, film):
     if len(acteurs)>0:
         print("\nActeurs :")
         for acteur in acteurs:
-            print("{:<10} {:<10} {:<15} {} {:<15}".format(acteur[5],acteur[1], acteur[2], acteur[3], acteur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(acteur["prenom"], acteur["nom"], acteur["dateNaissance"], acteur["nationalite"]))
         print("\n1. Ajouter Acteur")
         print("2. Supprimer Acteur")
         print("3. Continuer")
@@ -730,7 +727,7 @@ def update_film(conn, film):
     if len(realisateurs)>0:
         print("\nRéalisateurs :")
         for realisateur in realisateurs:
-            print("{:<10} {:<10} {:<15} {} {:<15}".format(realisateur[5],realisateur[1], realisateur[2], realisateur[3], realisateur[4]))
+            print("{:<10} {:<15} {} {:<15}".format(realisateur["prenom"], realisateur["nom"], realisateur["dateNaissance"], realisateur["nationalite"]))
         print("\n1. Ajouter Réalisateur")
         print("2. Supprimer Réalisateur")
         print("3. Finir")
@@ -744,10 +741,13 @@ def update_film(conn, film):
                 break
 
 def delete_acteur(conn, film):
-    id = input("Id de l'acteur : ")
+    id = input("Index de l'acteur: ")
+    contributeurs = film[10]
+    contributeurs["acteur"].pop(int(id)-1)
     query = f"""
-        DELETE FROM Acteur
-        WHERE id_contributeur = '{id}' AND id_film = '{film[0]}'
+        UPDATE Film
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {film[0]};
         """
     execute_query(conn,query)
 
@@ -756,35 +756,23 @@ def insert_acteur(conn, film):
     prenom = input("Prenom de l'acteur: ")
     date_naissance = input("Date de naissance: ")
     nationalite = input("Nationalité: ")
+    contributeurs = film[10]
+    contributeurs["acteur"].append({"nom": nom, "prenom": prenom, "dateNaissance": date_naissance, "nationalite": nationalite})
     query = f"""
-        SELECT * FROM ActeurDetails
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}' AND id_film = '{film[0]}'
+        UPDATE Film
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {film[0]};
         """
-    results = execute_query(conn,query)
-    if len(results)==0:
-        query = f"""
-        SELECT * FROM Contributeur
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-        """
-        results = execute_query(conn,query)
-        if len(results)==0:
-            query = f"""INSERT INTO Contributeur (prenom, nom, datenaissance,nationalite)
-            VALUES ('{prenom}', '{nom}', '{date_naissance}', '{nationalite}');"""
-            execute_query(conn,query)
-            query = f"""
-            SELECT * FROM Contributeur
-            WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-            """
-            results = execute_query(conn,query)
-        query = f"""INSERT INTO Acteur (id_film, id_contributeur)
-        VALUES ('{film[0]}', '{results[0][0]}');"""
-        execute_query(conn,query)
+    execute_query(conn,query)
 
 def delete_realisateur(conn, film):
-    id = input("Id du realisateur : ")
+    id = input("Index de l'realisateur: ")
+    contributeurs = film[10]
+    contributeurs["realisateur"].pop(int(id)-1)
     query = f"""
-        DELETE FROM realisateur
-        WHERE id_contributeur = '{id}' AND id_film = '{film[0]}'
+        UPDATE Film
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {film[0]};
         """
     execute_query(conn,query)
 
@@ -793,29 +781,14 @@ def insert_realisateur(conn, film):
     prenom = input("Prenom du realisateur: ")
     date_naissance = input("Date de naissance: ")
     nationalite = input("Nationalité: ")
+    contributeurs = film[10]
+    contributeurs["realisateur"].append({"nom": nom, "prenom": prenom, "dateNaissance": date_naissance, "nationalite": nationalite})
     query = f"""
-        SELECT * FROM realisateurDetails
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}' AND id_film = '{film[0]}'
+        UPDATE Film
+        SET contributeur = '{json.dumps(contributeurs)}'
+        WHERE id = {film[0]};
         """
-    results = execute_query(conn,query)
-    if len(results)==0:
-        query = f"""
-        SELECT * FROM Contributeur
-        WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-        """
-        results = execute_query(conn,query)
-        if len(results)==0:
-            query = f"""INSERT INTO Contributeur (prenom, nom, datenaissance,nationalite)
-            VALUES ('{prenom}', '{nom}', '{date_naissance}', '{nationalite}');"""
-            execute_query(conn,query)
-            query = f"""
-            SELECT * FROM Contributeur
-            WHERE nom = '{nom}' AND prenom = '{prenom}' AND datenaissance = '{date_naissance}' AND nationalite = '{nationalite}'
-            """
-            results = execute_query(conn,query)
-        query = f"""INSERT INTO realisateur (id_film, id_contributeur)
-        VALUES ('{film[0]}', '{results[0][0]}');"""
-        execute_query(conn,query)
+    execute_query(conn,query)
 
 def display_prêts(conn,prêt):
     print(f"Date prêt: {prêt[1]}")
@@ -1224,6 +1197,8 @@ def choose_table(conn):
             values['ISBN'] = input("Entrez le code ISBN du livre : ")
             values['resume'] = input("Entrez le résumé du livre : ")
             values['langue'] = input("Entrez la langue du livre : ")
+            values['dureeMaxPret'] = get_user_input("Entrez la durée maximum de prêt (en jours) : ", int)
+            insert_livre(conn, values)
     # ...
 
     elif table_choice == 2:  # Si la table est Musique
@@ -1233,6 +1208,8 @@ def choose_table(conn):
         values['genre'] = input("Entrez le genre de la ressource : ")
         values['codeClassification'] = get_user_input("Entrez le code de classification de la ressource : ", int)
         values['longueur'] = get_user_input("Entrez la longueur de la musique (en secondes) : ", int)
+        values['dureeMaxPret'] = get_user_input("Entrez la durée maximum de prêt (en jours) : ", int)
+        insert_musique(conn, values)
 
     elif table_choice == 3:  # Si la table est Film
         values['titre'] = input("Entrez le titre de la ressource : ")
@@ -1243,11 +1220,16 @@ def choose_table(conn):
         values['langue'] = input("Entrez la langue du film : ")
         values['length'] = get_user_input("Entrez la durée du film (en minutes) : ", int)
         values['synopsis'] = input("Entrez le synopsis du film : ")
+        values['dureeMaxPret'] = get_user_input("Entrez la durée maximum de prêt (en jours) : ", int)
+        insert_film(conn, values)
 
 def get_active_sanctions_from_login(conn,login):
     query = f"""
-            SELECT * FROM SanctionDetails
-            WHERE login LIKE '{login}%' AND ((datefinsanction IS NULL OR datefinsanction > CURRENT_DATE) OR (paye = 'false' OR paye IS NULL))
+            SELECT login, sanctions FROM AdherentDetails
+            WHERE login LIKE '{login}%' AND (
+                (sanctions->>'dateFinSanction' IS NULL OR (sanctions->>'dateFinSanction')::DATE > CURRENT_DATE) 
+                OR (sanctions->>'paye' = 'false' OR sanctions->>'paye' IS NULL)
+            )
     """
     results = execute_query(conn, query)
     return results
@@ -1260,16 +1242,17 @@ def handle_sanctions(conn):
             print("Sanctions")
             print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format("Index", "Login", "Date sanction", "Date fin sanction", "Motif", "Montant", "Payé"))
             print("=" * 90)
-            for index, row in enumerate(sanctions):
-                print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
-                    index + 1,
-                    row[0] if row[0] is not None else "",
-                    f'{row[2]}' if row[2] is not None else "",
-                    f'{row[3]}' if row[3] is not None else "",
-                    row[4] if row[4] is not None else "",
-                    row[5] if row[5] is not None else "",
-                    'Oui' if row[6] is not None or row[6]==1 else "Non"
-                ))
+            for index, user in enumerate(sanctions):
+                for index2, sanction in enumerate(user[1]):
+                    print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
+                        index2 + 1,
+                        user[0] if user[0] is not None else "",
+                        f'{sanction["dateSanction"]}' if sanction["dateSanction"] is not None else "",
+                        f'{sanction["dateFinSanction"]}' if sanction["dateFinSanction"] is not None else "",
+                        sanction["motif"] if sanction["motif"] is not None else "",
+                        sanction["montant"] if sanction["montant"] is not None else "",
+                        'Oui' if sanction["paye"] is not None or sanction["paye"]==1 else "Non"
+                    ))
             print("=" * 90)
             print("\n")
             choice = int(input("Sélectionnez un index de sanction (-1 retour): "))
@@ -1283,16 +1266,17 @@ def handle_sanctions_adherent(conn,login):
             print("Sanctions")
             print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format("Index", "Login", "Date sanction", "Date fin sanction", "Motif", "Montant", "Payé"))
             print("=" * 90)
-            for index, row in enumerate(sanctions):
-                print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
-                    index + 1,
-                    row[0] if row[0] is not None else "",
-                    f'{row[2]}' if row[2] is not None else "",
-                    f'{row[3]}' if row[3] is not None else "",
-                    row[4] if row[4] is not None else "",
-                    row[5] if row[5] is not None else "",
-                    'Oui' if row[6] is not None or row[6]==1 else "Non"
-                ))
+            for index, user in enumerate(sanctions):
+                for index2, sanction in enumerate(user[1]):
+                    print("{:<6} {:<10} {:<16} {:<18} {:<15} {:<10} {:<10}".format(
+                        index2 + 1,
+                        user[0] if user[0] is not None else "",
+                        f'{sanction["dateSanction"]}' if sanction["dateSanction"] is not None else "",
+                        f'{sanction["dateFinSanction"]}' if sanction["dateFinSanction"] is not None else "",
+                        sanction["motif"] if sanction["motif"] is not None else "",
+                        sanction["montant"] if sanction["montant"] is not None else "",
+                        'Oui' if sanction["paye"] is not None or sanction["paye"]==1 else "Non"
+                    ))
             print("=" * 90)
             print("\n")
             print("1. Retour")
@@ -1388,3 +1372,52 @@ def recommandations(conn, login):
                     print("{:<15}".format(result[0]))
         print("\n1. Retour")
         choice = input("Que voulez_vous faire ? : ")
+
+def insert_livre(conn, values):
+    insert_query = sql.SQL("INSERT INTO Livre (titre, dateApparition, editeur, genre, codeClassification, dureeMaxPret, ISBN, resume, langue) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})").format(
+            sql.Literal(values['titre']),
+            sql.Literal(values['dateApparition']),
+            sql.Literal(values['editeur']),
+            sql.Literal(values['genre']),
+            sql.Literal(values['codeClassification']),
+            sql.Literal(values['dureeMaxPret']),
+            sql.Literal(values['ISBN']),
+            sql.Literal(values['resume']),
+            sql.Literal(values['langue'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
+
+def insert_musique(conn, values):
+    insert_query = sql.SQL("INSERT INTO Musique (titre, dateApparition, editeur, genre, codeClassification, dureeMaxPret, longueur) VALUES ({}, {}, {}, {}, {}, {}, {})").format(
+            sql.Literal(values['titre']),
+            sql.Literal(values['dateApparition']),
+            sql.Literal(values['editeur']),
+            sql.Literal(values['genre']),
+            sql.Literal(values['codeClassification']),
+            sql.Literal(values['dureeMaxPret']),
+            sql.Literal(values['longueur'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
+
+def insert_film(conn, values):
+    insert_query = sql.SQL("INSERT INTO Film (titre, dateApparition, editeur, genre, codeClassification, dureeMaxPret, langue, length, synopsis) VALUES ({}, {}, {}, {}, {}, {}, {})").format(
+            sql.Literal(values['titre']),
+            sql.Literal(values['dateApparition']),
+            sql.Literal(values['editeur']),
+            sql.Literal(values['genre']),
+            sql.Literal(values['codeClassification']),
+            sql.Literal(values['dureeMaxPret']),
+            sql.Literal(values['langue']),
+            sql.Literal(values['length']),
+            sql.Literal(values['synopsis'])
+        )
+    cursor = conn.cursor()
+    cursor.execute(insert_query)
+    conn.commit()
+    cursor.close()
