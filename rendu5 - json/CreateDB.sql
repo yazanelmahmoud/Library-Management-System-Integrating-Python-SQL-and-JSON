@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS Livre (
     contributeur JSON,
     exemplaires JSON
 );
+
 CREATE TABLE IF NOT EXISTS Musique (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(100) NOT NULL,
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS Musique (
     contributeur JSON,
     exemplaires JSON
 );
+
 CREATE TABLE IF NOT EXISTS Film (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(100) NOT NULL,
@@ -48,6 +50,7 @@ CREATE TABLE IF NOT EXISTS Utilisateur (
     email VARCHAR(150),
     adresse JSON NOT NULL
 );
+
 CREATE TABLE IF NOT EXISTS Adherent (
     id INT PRIMARY KEY,
     numeroTelephone VARCHAR(100) NOT NULL,
