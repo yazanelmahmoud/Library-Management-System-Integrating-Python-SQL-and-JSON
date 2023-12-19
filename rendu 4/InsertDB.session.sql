@@ -1,4 +1,3 @@
-
 INSERT INTO Ressource (titre, dateApparition, editeur, genre, codeClassification)
 VALUES
     ('Book 1', '2023-01-01', 'Publisher A', 'Fiction', 101),
