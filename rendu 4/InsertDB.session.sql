@@ -80,7 +80,7 @@ VALUES
     (1, 1, 2, '2023-01-10', 14, '2023-01-24', 'Bon'),
     (2, 2, 1, '2023-02-15', 7, '2023-02-22', 'Neuf');
 
-INSERT INTO Sanction (DateSanction, DateFinSanction, motif, montant)
+INSERT INTO Sanction (id_adherent, DateSanction, DateFinSanction, motif, montant, paye)
 VALUES
-    ('2023-01-25', '2023-02-25', 'Retard', 10.00),
-    ('2023-02-23', '2023-03-23', 'Deterioration', 15.00);
+    (1, '2023-01-25', '2023-02-25', 'Retard', 10.00, false),
+    (2, '2023-02-23', '2023-03-23', 'Deterioration', 15.00, false);
