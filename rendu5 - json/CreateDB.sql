@@ -101,7 +101,7 @@ JOIN Utilisateur U ON A.id = U.id;
 
 CREATE VIEW FilmExemplaires AS
 SELECT
-    R.id_films,
+    R.id,
     R.titre,
     R.dateApparition,
     R.editeur,
@@ -114,5 +114,53 @@ SELECT
     R.contributeur,
     E->>'id' AS id_exemplaire,
     E->>'etat' AS etat_exemplaire
-FROM Film R
-JOIN JSON_ARRAY_ELEMENTS(R.exemplaires) E ON TRUE;
+FROM Film R, JSON_ARRAY_ELEMENTS(R.exemplaires) E;
+
+CREATE VIEW LivreExemplaires AS
+SELECT
+    L.id,
+    L.titre,
+    L.dateApparition,
+    L.editeur,
+    L.genre,
+    L.codeClassification,
+    L.dureeMaxPret,
+    L.ISBN,
+    L.resume,
+    L.langue,
+    C->>'auteur' AS auteur,
+    E->>'id' AS id_exemplaire,
+    E->>'etat' AS etat_exemplaire
+FROM Livre L, JSON_ARRAY_ELEMENTS(L.exemplaires) E, JSON_ARRAY_ELEMENTS(L.contributeur) C ;
+
+CREATE VIEW MusiqueExemplaires AS
+SELECT
+    M.id,
+    M.titre,
+    M.dateApparition,
+    M.editeur,
+    M.genre,
+    M.codeClassification,
+    M.dureeMaxPret,
+    M.longueur,
+    C->>'compositeur' AS compositeur,
+    E->>'id' AS id_exemplaire,
+    E->>'etat' AS etat_exemplaire
+FROM Musique M, JSON_ARRAY_ELEMENTS(M.exemplaires) E , JSON_ARRAY_ELEMENTS(M.contributeur) C;
+
+CREATE VIEW LivreContributeur AS
+SELECT
+    L.id,
+    L.titre,
+    L.dateApparition,
+    L.editeur,
+    L.genre,
+    L.codeClassification,
+    L.dureeMaxPret,
+    L.ISBN,
+    L.resume,
+    L.langue,
+    C->>'auteur' AS auteur,
+    E->>'id' AS id_exemplaire,
+    E->>'etat' AS etat_exemplaire
+FROM Livre L, JSON_ARRAY_ELEMENTS(L.contributeur) C, JSON_ARRAY_ELEMENTS(L.exemplaires) E;

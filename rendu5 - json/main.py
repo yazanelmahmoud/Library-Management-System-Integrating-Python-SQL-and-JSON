@@ -369,15 +369,29 @@ def option_8(conn,login):
 
 def option_9(conn,login):
     os.system('cls')
-    global_stats(conn)
+    print("Voulez-vous voir les statistiques de quelle ressource : ?")
+    print("1. Livre\n")
+    print("2. Musique\n")
+    print("3. Film\n")
+    input_user = int(input("Entrez votre choix : "))
+    if input_user == 1:
+        type = 'Livre'
+    elif input_user == 2:
+        type = 'Musique'
+    elif input_user == 3:
+        type = 'Film'
+    else:
+        print("Choix invalide. Veuillez réessayer.")
+        option_9(conn,login)
+    global_stats(conn, type)
 
 def afficher_menu():
     os.system("cls")
     print("\n=============== Menu Personnel ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
-    print("3. Gérer les prêts (à faire)")
-    print("4. Gérer les sanctions (à faire)")
+    print("3. Gérer les prêts (reste une requête ) ")
+    print("4. Gérer les sanctions (fait)")
     print("5. Gérer les utilisateurs (à faire)")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")

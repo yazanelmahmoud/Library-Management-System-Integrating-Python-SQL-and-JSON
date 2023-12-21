@@ -13,14 +13,15 @@ def get_user_input(prompt, data_type):
         except ValueError:
             print("Erreur de saisie. Veuillez entrer une valeur valide.")
 
-def insert_into_pret(connection, values):
+def insert_into_pret(connection,type, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Adherent (numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({}, {}, {}, {}, {})").format(
-            sql.Literal(values['numeroTelephone']),
-            sql.Literal(values['dateNaissance']),
+        insert_query = sql.SQL("INSERT INTO {type} () VALUES ({}, {}, {}, {}, {})").format(
+            sql.Literal(values['id']),
+            sql.Literal(values['numerotelephone']),
+            sql.Literal(values['datenaissance']),
             sql.Literal(values['statut']),
-            sql.Literal(values['sanctions']),
+            sql.Literal(values['sanction']),
             sql.Literal(values['prets']),
         )
         cursor.execute(insert_query)
@@ -50,8 +51,8 @@ def execute_query(conn, query):
 
 def get_prets_en_cours_from_login(conn, login):
     query = f"""
-            SELECT prets FROM AdherentDetails
-            WHERE login LIKE '{login}%' AND prets->'dateRetour' IS NULL
+            SELECT prets FROM pretadherent
+            WHERE login LIKE '{login}%' AND prets->>'dateRetour' IS NULL
     """
     results = execute_query(conn, query)
     if len(results) >0:
@@ -61,7 +62,7 @@ def get_prets_en_cours_from_login(conn, login):
 def get_film_exemplaires(conn, titre):
     query = f"""
             SELECT * FROM Film
-            WHERE titre LIKE '{titre}%'
+            WHERE titre LIKE '{titre}%'6-
     """
     results = execute_query(conn, query)
     return results
@@ -158,7 +159,7 @@ def get_livre_ressources(conn,titre):
 
 def get_adherent_details(conn, login):
     query = f"""
-            SELECT * FROM AdherentDetails
+            SELECT * FROM PretAdherent
             WHERE login LIKE '{login}%'
     """
     results = execute_query(conn, query)
@@ -325,32 +326,38 @@ def display_exemplaires_adherent(conn, ressource, type):
     choice = int(input("Que voulez_vous faire ? : "))
     globals()[f'display_{type}_adherent'](conn, ressource)
  
-def display_exemplaires_prêt(conn, ressource, values):
+def display_exemplaires_prêt(conn, ressource, values, typeRessource):
     os.system('cls')
     # requête permettant d'ajouter un nouveau pret
+    #print(values)
+    #print(ressource)
+    #print(typeRessource)
     query = f"""
-            INSERT INTO Adherent (datePret, dateRetour, etatRetour, duree, type, id_adherent, id_exemplaire)
-            """
+         select E->>'id' as ID, E->>'etat' as Etat, E->>'disponible' as Disponible 
+         from {typeRessource}, json_array_elements(exemplaires) as E
+         where titre = '{ressource[1]}' and E->>'disponible' = 'true' and E->>'etat' != 'Perdu'  and E->>'etat' != 'Abime'
+    """
     exemplaires = execute_query(conn, query)
+    #print(exemplaires)
     if len(exemplaires)>0:
         print("\nExemplaires :")
         for index, exemplaire in enumerate(exemplaires):
-            print("{:<10} {:<15} {:<15}".format(index+1, exemplaire[2], "disponible" if exemplaire[3] == 1 else "non disponible"))
+            print("{:<10} {:<15} {:<15} {:<15}".format(index+1, exemplaire[0],exemplaire[1], "disponible" if exemplaire[2] == 'true' else "non disponible"))
     choice = int(input("\nQuel exemplaire choisissez vous (-1 pour annuler) : "))
     if choice in range(-1, len(exemplaires)+1):
         if choice != -1:
             values["id_exemplaire"] = exemplaires[choice-1][0]
             values['datePret'] = input("Entrez la date de prêt (format YYYY-MM-DD) : ")
             values['duree'] = get_user_input("Entrez la durée du prêt (en jours) : ", int)
-            insert_into_pret(conn, values)
-            emprunt_exemplaire(conn,values["id_exemplaire"])
+            insert_into_pret(conn,typeRessource,values)
+            emprunt_exemplaire(conn,typeRessource,values["id_exemplaire"])
 
-def emprunt_exemplaire(conn,id_exemplaire):
+def emprunt_exemplaire(conn,type,id_exemplaire):
     query = f"""
-        UPDATE Exemplaire
-        SET disponible = 'false'
-        WHERE id = '{id_exemplaire}';
-    """
+        UPDATE {type}
+        SET exemplaires = JSONB_SET(exemplaires, '$.disponible', 'false')
+        WHERE id = {id_exemplaire};
+        """
     _ = execute_query(conn, query)
 
 def delete_ressource(conn, id_ressource, type):
@@ -880,7 +887,7 @@ def update_status_adherent(conn):
     execute_query(conn,query)
 def check_login_adherent_valid(conn, login):
     query = f"""
-            SELECT * FROM AdherentDetails
+            SELECT * FROM pretadherent
             WHERE login = '{login}' AND statut = 'active'
     """
     results = execute_query(conn, query)
@@ -1165,12 +1172,15 @@ def insert_prêt(conn,login):
             if choice in range(-1, len(films)+len(musiques)+len(livres)):
                 if choice != -1:
                         if choice < len(livres):
+                            type = 'Livre'
                             ressource = livres[choice]
                         elif choice >= len(livres) + len(films):
+                            type = 'Musique'
                             ressource = musiques[choice-len(livres)-len(films)]
                         else:
+                            type = 'Film'
                             ressource = films[choice-len(livres)]
-                        display_exemplaires_prêt(conn, ressource, values)
+                        display_exemplaires_prêt(conn, ressource, values, type)
 
 
 def choose_table(conn):
@@ -1224,7 +1234,7 @@ def choose_table(conn):
 
 def get_active_sanctions_from_login(conn,login):
     query = f"""
-            SELECT login, sanctions FROM AdherentDetails
+            SELECT login, sanctions FROM pretadherent
             WHERE login LIKE '{login}%' AND (
                 (sanctions->>'dateFinSanction' IS NULL OR (sanctions->>'dateFinSanction')::DATE > CURRENT_DATE) 
                 OR (sanctions->>'paye' = 'false' OR sanctions->>'paye' IS NULL)
@@ -1333,18 +1343,19 @@ def check_credentials(conn, login, pwd):
                 return "adherent"
     return "non"
 
-def global_stats(conn):
+def global_stats(conn, type):
     query = f"""
-    SELECT titre, COUNT(titre) FROM PretDetails
+    SELECT titre, COUNT(P->>'id') FROM {type}, JSON_ARRAY_ELEMENTS({type}.exemplaires) AS P
     GROUP BY titre
-    ORDER BY COUNT(titre) DESC
+    ORDER BY COUNT(P->>'id') DESC
     """
     results = execute_query(conn, query)
+    print(results)
     if len(results)>0:
         print("Statistiques\n")
-        print("{:<15}{:<5}".format("Titre", "Nombre d'emprunts"))
+        print("{:<15}{:<15}".format("Titre", "Nombre d'emprunts"))
         for result in results:
-            print("{:<15}{:<5}".format(result[0], result[1]))
+            print("{:<15}  \t {:<15}".format(result[0], result[1]))
         print("\n1. Retour")
         choice = input("Que voulez_vous faire ? : ")
 

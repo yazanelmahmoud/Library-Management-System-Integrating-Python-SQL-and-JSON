@@ -17,7 +17,7 @@
       "askForPassword": true,
       "driver": "PostgreSQL",
       "name": "nf18",
-      "database": "libraryJSON",
+      "database": "library",
       "username": "postgres"
     }
   ]
