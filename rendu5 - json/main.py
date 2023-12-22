@@ -127,7 +127,21 @@ def option_adherent_2(conn,login):
 
 def option_adherent_4(conn,login):
     os.system('cls')
-    recommandations(conn, login)
+    print("Vous voulez voir les recommandations de quelle ressource : ?")
+    print("1. Livre\n")
+    print("2. Musique\n")
+    print("3. Film\n")
+    input_user = int(input("Entrez votre choix : "))
+    if input_user == 1:
+        type = 'Livre'
+    elif input_user == 2:
+        type = 'Musique'
+    elif input_user == 3:
+        type = 'Film'
+    else:
+        print("Choix invalide. Veuillez réessayer.")
+        option_adherent_4(conn,login)
+    recommandations(conn,type,login)
 
 # Insert ressources
 def option_2(conn,login):
@@ -391,12 +405,12 @@ def afficher_menu():
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
     print("3. Gérer les prêts (reste une requête ) ")
-    print("4. Gérer les sanctions (fait)")
+    print("4. Gérer les sanctions ")
     print("5. Gérer les utilisateurs (à faire)")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
     print("8. Supprimer une table (Administrateur)")
-    print("9. Statistiques (à faire)")
+    print("9. Statistiques ")
     print("10. Quitter")
     print("=============================================")
 
@@ -406,7 +420,7 @@ def afficher_menu_adherent():
     print("1. Recherche Livre / Musique / Film")
     print("2. Consulter ses prêts")
     print("3. Consulter ses sanctions")
-    print("4. Recommandations (à faire)")
+    print("4. Recommandations ")
     print("5. Quitter")
     print("=============================================")
 
@@ -427,7 +441,7 @@ def choisir_option_adherent(conn,login):
     while True:
         afficher_menu_adherent()
         choice = input("Quel opération voulez-vous effectuer ? ")
-        if choice in ('1', '2', '3','5'):
+        if choice in ('1', '2', '3','4' ,'5'):
             if choice == '5':
                 print("Au revoir !")
                 break

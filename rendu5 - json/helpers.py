@@ -1359,29 +1359,36 @@ def global_stats(conn, type):
         print("\n1. Retour")
         choice = input("Que voulez_vous faire ? : ")
 
-def recommandations(conn, login):
-    query = f"""
-    SELECT P.titre, P.genre, COUNT(P.titre) FROM PretDetails P
-    WHERE P.login='{login}'
-    GROUP BY titre, genre
-    ORDER BY COUNT(titre) DESC
-    """
-    results = execute_query(conn, query) 
-    if len(results)>0:
-        titre = results[0][0]
-        print(f"Comme vous avez aimé {results[0][0]}")
-        print(f"Nous vous recommandons dans le même genre '{results[0][1]}' :\n")
-        query = f"""
-        SELECT titre FROM Ressource R
-        WHERE R.genre='{results[0][1]}'
-        """
-        results = execute_query(conn, query)
-        if len(results)>0: 
-            for result in results:
-                if result[0] != titre:
-                    print("{:<15}".format(result[0]))
-        print("\n1. Retour")
-        choice = input("Que voulez_vous faire ? : ")
+def recommandations(conn,type,login):
+    query0 = f"""
+            SELECT login FROM Utilisateur
+            """
+    logins = execute_query(conn, query0)
+    for log in logins:
+        if log[0] ==login:
+            query = f"""
+            SELECT {type}.titre, {type}.genre, COUNT({type}.titre)
+            FROM {type}, JSON_ARRAY_ELEMENTS({type}.exemplaires) AS E
+            WHERE E->>'disponible' = 'true' AND E->>'etat' = 'Bon' AND E->>'id' NOT IN (SELECT P->>'id' FROM PretAdherent, JSON_ARRAY_ELEMENTS(PretAdherent.prets) AS P WHERE PretAdherent.login = '{login}')
+            GROUP BY {type}.titre, {type}.genre
+            ORDER BY COUNT({type}.titre) DESC
+            """
+            results = execute_query(conn, query) 
+            if len(results)>0:
+                titre = results[0][0]
+                print(f"Comme vous avez aimé {results[0][0]}")
+                print(f"Nous vous recommandons dans le même genre '{results[0][1]}' :\n")
+                query = f"""
+                SELECT titre FROM {type}
+                WHERE {type}.genre='{results[0][1]}'
+                """
+                results = execute_query(conn, query)
+                if len(results)>0: 
+                    for result in results:
+                        if result[0] != titre:
+                            print("{:<15}".format(result[0]))
+                print("\n1. Retour")
+                choice = input("Que voulez_vous faire ? : ")
 
 def insert_livre(conn, values):
     insert_query = sql.SQL("INSERT INTO Livre (titre, dateApparition, editeur, genre, codeClassification, dureeMaxPret, ISBN, resume, langue) VALUES ({}, {}, {}, {}, {}, {}, {}, {}, {})").format(
