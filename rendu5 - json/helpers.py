@@ -880,7 +880,7 @@ def rendre_prêt(conn, pret):
 def update_status_adherent(conn):
     login = input("Login: ")
     id = get_utilisateur_id_from_login(conn,login)
-    status = input("Nouveau statut (active, exepire, suspendue, blackliste): ")
+    status = input("Nouveau statut (active, expire, suspendue, blackliste): ")
     query = f"""UPDATE Adherent
         SET statut = '{status}'
         WHERE id = '{id}';"""
@@ -939,8 +939,10 @@ def handle_adherent(conn):
     login = input("Entrez login recherché: ")
     adherent = get_adherent_details(conn, login)
     print("\nAdhérents :")
+    print("{:<10} {:<15} {:15} {:<15} ".format("Prenom", "Nom", "Email", "Statut"))
     for index, membre in enumerate(adherent):
-            print("{:<10} {:<10} {:<15} {:15} {:<15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5], membre[12]))
+        print("{:<10} {:<15} {:15} {:<15} ".format(membre[3], membre[4], membre[5], membre[9]))
+
     print("\n1. Ajouter membre")
     print("2. Supprimer membre")
     print("3. Modifier statut adherent")
@@ -974,13 +976,14 @@ def insert_into_adresse(connection, values):
 def insert_into_utilisateur(connection, values):
     try:
         cursor = connection.cursor()
+        adresse_json = json.dumps(values['adresse'])
         insert_query = sql.SQL("INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ( {}, {}, {}, {}, {}, {})").format(
             sql.Literal(values['login']),
             sql.Literal(values['password']),
             sql.Literal(values['prenom']),
             sql.Literal(values['nom']),
             sql.Literal(values['email']),
-            sql.Literal(values['id_adresse'])
+            sql.Literal(adresse_json)
         )
         cursor.execute(insert_query)
         connection.commit()
@@ -1010,11 +1013,13 @@ def insert_into_personnel(connection, values):
 def insert_into_adherent(connection, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut) VALUES ({}, {}, {}, {})").format(
-            sql.Literal(values['id_utilisateur']),
+        insert_query = sql.SQL("INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({}, {}, {}, {}, {},{})").format(
+            sql.Literal(values['id']),
             sql.Literal(values['numeroTelephone']),
             sql.Literal(values['dateNaissance']),
-            sql.Literal(values['statut'])
+            sql.Literal(values['statut']),
+            sql.Literal(values['sanctions']),
+            sql.Literal(values['prets'])
         )
         cursor.execute(insert_query)
         connection.commit()
@@ -1090,32 +1095,35 @@ def delete_personnel(conn):
 
 def insert_adherent(conn):
     os.system("cls")
-    values = {}
-    values['login'] = input("Login: ")
-    values['password'] = input("Password: ")
-    values['prenom'] = input("Prenom: ")
-    values['nom'] = input("Nom: ")
-    values['email'] = input("Email: ")
-    values['numeroTelephone'] = input("numero de téléphone: ")
-    values['dateNaissance'] = input("Date de naissance (YYYY-MM-DD): ")
-    values['statut'] = "active"
-    values['rue'] = input("Rue: ")
-    values['numero'] = input("N°: ")
-    values['codePostal'] = input("Code Postal: ")
-    values['ville'] = input("Ville: ")
+    valuesUtilisteur = {}
+    valuesAdherent = {}
+    
+    adress = {}
+    valuesUtilisteur['login'] = input("Login: ")
+    valuesUtilisteur['password'] = input("Password: ")
+    valuesUtilisteur['prenom'] = input("Prenom: ")
+    valuesUtilisteur['nom'] = input("Nom: ")
+    valuesUtilisteur['email'] = input("Email: ")
+    adress['rue'] = input("Rue: ")
+    adress['numero'] = input("N°: ")
+    adress['codePostal'] = input("Code Postal: ")
+    adress['ville'] = input("Ville: ")
+    valuesUtilisteur['adresse'] = adress
+
+    valuesAdherent['numeroTelephone'] = input("numero de téléphone: ")
+    valuesAdherent['dateNaissance'] = input("Date de naissance (YYYY-MM-DD): ")
+    valuesAdherent['statut'] = "active"
+    valuesAdherent['sanctions'] = []
+    valuesAdherent['prets'] = []
+    
+    
     try:
-        insert_into_adresse(conn,values)
+        insert_into_utilisateur(conn, valuesUtilisteur)
     except:
         print("")
-    values['id_adresse'] = get_adresse_id_from_data(conn, values)
-    if values['id_adresse'] != "":
-        try:
-            insert_into_utilisateur(conn, values)
-        except:
-            print("")
-        values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
-        if values['id_utilisateur'] != "":
-            insert_into_adherent(conn,values)
+    valuesAdherent['id'] = get_utilisateur_id_from_login(conn, valuesUtilisteur["login"])
+    if valuesAdherent['id'] != "":
+        insert_into_adherent(conn,valuesAdherent)
 
 def delete_adherent(conn):
     login = input("Login de l'adhérent à supprimer: ")
