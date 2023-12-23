@@ -144,7 +144,7 @@ def option_5(conn,login):
 # Visualiser les tables
 def option_6(conn,login):
     os.system('cls')
-    mot_de_passe = input("Entrez le mot de passe : ")
+    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
@@ -209,7 +209,7 @@ def option_6(conn,login):
 def option_7(conn,login):
     os.system('cls')
     # Il faut que l'utilisateur soit un administrateur
-    mot_de_passe = input("Entrez le mot de passe : ")
+    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
@@ -316,7 +316,7 @@ def option_7(conn,login):
 #Supprimer une table
 def option_8(conn,login):
     os.system('cls')
-    mot_de_passe = input("Entrez le mot de passe : ")
+    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
