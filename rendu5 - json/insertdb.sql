@@ -38,4 +38,3 @@ INSERT INTO Personnel (id) VALUES
 
 -- SELECT titre, dateApparition, editeur, genre, codeClassification, CAST(E->>'id' AS INTEGER) AS id_exemplaire, E->>'etat' AS etat_exemplaire, C->>'realisateur' AS Realisateur, C->>'acteur' AS Acteur, C->>'auteur' AS Auteur
 -- FROM Ressource R, JSON_ARRAY_ELEMENTS(R.exemplaires) E, JSON_ARRAY_ELEMENTS(R.contributeur) C;
-69

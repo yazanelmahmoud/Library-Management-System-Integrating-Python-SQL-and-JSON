@@ -404,7 +404,7 @@ def afficher_menu():
     print("\n=============== Menu Personnel ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
-    print("3. Gérer les prêts (reste une requête ) ")
+    print("3. Gérer les prêts")
     print("4. Gérer les sanctions ")
     print("5. Gérer les utilisateurs (à faire)")
     print("6. Visualiser les tables (Administrateur)")

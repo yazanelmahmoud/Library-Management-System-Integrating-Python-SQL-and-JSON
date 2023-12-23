@@ -14,17 +14,15 @@ def get_user_input(prompt, data_type):
             print("Erreur de saisie. Veuillez entrer une valeur valide.")
 
 def insert_into_pret(connection,type, values):
+    #print(values)
+    #print(type)
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO {type} () VALUES ({}, {}, {}, {}, {})").format(
-            sql.Literal(values['id']),
-            sql.Literal(values['numerotelephone']),
-            sql.Literal(values['datenaissance']),
-            sql.Literal(values['statut']),
-            sql.Literal(values['sanction']),
-            sql.Literal(values['prets']),
-        )
-        cursor.execute(insert_query)
+        select_query = f"""SELECT id, numerotelephone, datenaissance, statut FROM Adherent WHERE id = '{values['id_adherent']}';"""
+        cursor.execute(select_query)
+        adherent = cursor.fetchone()
+        update_query = f"""UPDATE Adherent SET statut = '{adherent[3]}', prets = '{json.dumps([{"duree": values["duree"], "datePret": values["datePret"], "dateRetour" : values["dateRetour"], "etatRetour": values["etatRetour"], "id" :values["id_adherent"], "exemplaireId" : values["id_exemplaire"], "idRessource" :values["idRessource"], "idPersonnel": values["idPersonnel"], "type": values["type"]}])}' WHERE id = '{values['id_adherent']}';"""
+        cursor.execute(update_query)
         connection.commit()
         print("Insertion réussie dans la table Adherent")
     except (Exception, psycopg2.Error) as error:
@@ -346,19 +344,35 @@ def display_exemplaires_prêt(conn, ressource, values, typeRessource):
     choice = int(input("\nQuel exemplaire choisissez vous (-1 pour annuler) : "))
     if choice in range(-1, len(exemplaires)+1):
         if choice != -1:
-            values["id_exemplaire"] = exemplaires[choice-1][0]
             values['datePret'] = input("Entrez la date de prêt (format YYYY-MM-DD) : ")
             values['duree'] = get_user_input("Entrez la durée du prêt (en jours) : ", int)
+            values["id_exemplaire"] = exemplaires[choice-1][0]
+            values['dateRetour'] = (datetime.strptime(values['datePret'], '%Y-%m-%d') + timedelta(days=values['duree'])).strftime('%Y-%m-%d')
+            values['etatRetour'] = input("Entrez l'état de retour (Neuf, Bon, Abime, Perdu) : ")
+            values['idRessource'] = ressource[0]
+            values['idPersonnel'] = input("Entrez l'identifiant du personnel : ")
+            values['type'] = typeRessource
             insert_into_pret(conn,typeRessource,values)
-            emprunt_exemplaire(conn,typeRessource,values["id_exemplaire"])
+            emprunt_exemplaire(conn, ressource, typeRessource,values["id_exemplaire"])
 
-def emprunt_exemplaire(conn,type,id_exemplaire):
+def emprunt_exemplaire(conn, ressource, type, id_exemplaire):
+    #print(type)
+    #print(id_exemplaire)
+    query2 = f"""
+         select E->>'id' as ID, E->>'etat' as Etat, E->>'disponible' as Disponible 
+         from {type}, json_array_elements(exemplaires) as E
+         where titre = '{ressource[1]}' and E->>'disponible' = 'true' and E->>'etat' != 'Perdu' 
+    """
+    exemplaires = execute_query(conn, query2)    
     query = f"""
         UPDATE {type}
-        SET exemplaires = JSONB_SET(exemplaires, '$.disponible', 'false')
-        WHERE id = {id_exemplaire};
-        """
+        SET exemplaires = '{json.dumps([{"id": exemplaire[0], "etat": exemplaire[1],"disponible": False if exemplaire[0] == id_exemplaire else exemplaire[2],  } for exemplaire in exemplaires])}' 
+        where titre = '{ressource[1]}';
+    """
     _ = execute_query(conn, query)
+    
+
+
 
 def delete_ressource(conn, id_ressource, type):
     query = f"""
@@ -880,7 +894,7 @@ def rendre_prêt(conn, pret):
 def update_status_adherent(conn):
     login = input("Login: ")
     id = get_utilisateur_id_from_login(conn,login)
-    status = input("Nouveau statut (active, exepire, suspendue, blackliste): ")
+    status = input("Nouveau statut (active, expire, suspendue, blackliste): ")
     query = f"""UPDATE Adherent
         SET statut = '{status}'
         WHERE id = '{id}';"""
@@ -920,27 +934,28 @@ def handle_personnel(conn):
     mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
-        return
-    login = input("Entrez login recherché: ")
-    personnel = get_personnel_details(conn, login)
-    print("\nMembres du personnel :")
-    for index, membre in enumerate(personnel):
-            print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
-    print("\n1. Ajouter membre")
-    print("2. Supprimer membre")
-    print("3. Retour")
-    choice = int(input("Que voulez_vous faire ? : "))
-    if choice == 1:
-                insert_personnel(conn)
-    elif choice == 2:
-                delete_personnel(conn)
+        handle_personnel(conn)
+    else:
+        login = input("Entrez login recherché: ")
+        personnel = get_personnel_details(conn, login)
+        print("\nMembres du personnel :")
+        for index, membre in enumerate(personnel):
+                print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
+        print("\n1. Ajouter membre")
+        print("2. Supprimer membre")
+        print("3. Retour")
+        choice = int(input("Que voulez_vous faire ? : "))
+        if choice == 1:
+                    insert_personnel(conn)
+        elif choice == 2:
+                    delete_personnel(conn)
 
 def handle_adherent(conn):
     login = input("Entrez login recherché: ")
     adherent = get_adherent_details(conn, login)
     print("\nAdhérents :")
     for index, membre in enumerate(adherent):
-            print("{:<10} {:<10} {:<15} {:15} {:<15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5], membre[12]))
+            print("{:<10} {:<10} {:<15} {:<15} {:<15} {:<15} ".format(index+1,membre[1], membre[3], membre[4], membre[5], membre[9]))
     print("\n1. Ajouter membre")
     print("2. Supprimer membre")
     print("3. Modifier statut adherent")
@@ -954,15 +969,15 @@ def handle_adherent(conn):
         update_status_adherent(conn)
 
 def insert_into_adresse(connection, values):
+    print(values)
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Adresse (rue, numero, codePostal, ville) VALUES ({}, {}, {}, {})").format(
-            sql.Literal(values['rue']),
-            sql.Literal(values['numero']),
-            sql.Literal(values['codePostal']),
-            sql.Literal(values['ville'])
-        )
-        cursor.execute(insert_query)
+        select_query = f"""SELECT id, login, password, prenom, nom, email FROM Utilisateur WHERE id = '{values['id']}';"""
+        cursor.execute(select_query)
+        adresse = cursor.fetchone()
+        print(adresse)
+        update_query = f"""UPDATE Utilisateur SET adresse = '{json.dumps([{"rue": values["rue"], "numero": values["numero"], "codePostal" : values["codePostal"], "ville": values["ville"]}])}' WHERE login = '{adresse[1]}';"""
+        cursor.execute(update_query)
         connection.commit()
         print("Insertion réussie dans la table Adresse")
     except (Exception, psycopg2.Error) as error:
@@ -972,16 +987,11 @@ def insert_into_adresse(connection, values):
             cursor.close()
 
 def insert_into_utilisateur(connection, values):
+    print(values)
     try:
-        cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ( {}, {}, {}, {}, {}, {})").format(
-            sql.Literal(values['login']),
-            sql.Literal(values['password']),
-            sql.Literal(values['prenom']),
-            sql.Literal(values['nom']),
-            sql.Literal(values['email']),
-            sql.Literal(values['id_adresse'])
-        )
+        cursor =connection.cursor()
+        insert_query = f"""
+        INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ('{values['login']}', '{values['password']}', '{values['prenom']}', '{values['nom']}', '{values['email']}', '{json.dumps([{"rue": values["rue"], "numero": values["numero"], "codePostal" : values["codePostal"], "ville": values["ville"]}])}'))"""
         cursor.execute(insert_query)
         connection.commit()
         print("Insertion réussie dans la table Utilisateur")
@@ -1025,13 +1035,13 @@ def insert_into_adherent(connection, values):
         if cursor:
             cursor.close()
 
-def get_adresse_id_from_data(conn, values):
+def get_adresse_rue_from_data(conn, values):
     try:
         query = f"""
-        SELECT id FROM Adresse
-        WHERE rue = '{values["rue"]}' AND numero = '{values["numero"]}' AND codepostal = '{values["codePostal"]}' AND ville = '{values["ville"]}'
+        SELECT adresse->>'numero' FROM Utilisateur
+        WHERE adresse->>'rue' = '{values["rue"]}' AND adresse->>'numero' = '{values["numero"]}' AND adresse->>'codepostal' = '{values["codePostal"]}' AND adresse->>'ville' = '{values["ville"]}'
         """
-        return execute_query(conn, query)[0]
+        return execute_query(conn, query)
     except:
         return ""
 
@@ -1058,18 +1068,12 @@ def insert_personnel(conn):
     values['codePostal'] = input("Code Postal: ")
     values['ville'] = input("Ville: ")
     try:
-        insert_into_adresse(conn,values)
+        insert_into_utilisateur(conn, values)
     except:
-        print("")
-    values['id_adresse'] = get_adresse_id_from_data(conn, values)
-    if values['id_adresse'] != "":
-        try:
-            insert_into_utilisateur(conn, values)
-        except:
-            print("")
-        values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
-        if values['id_utilisateur'] != "":
-            insert_into_personnel(conn,values)
+        print("Erreur lors de l'insertion dans la table Utilisateur")
+    values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
+    if values['id_utilisateur'] != "":
+        insert_into_personnel(conn,values)
 
 def delete_personnel(conn):
     login = input("Login du membre du personnel à supprimer: ")
@@ -1103,19 +1107,14 @@ def insert_adherent(conn):
     values['numero'] = input("N°: ")
     values['codePostal'] = input("Code Postal: ")
     values['ville'] = input("Ville: ")
-    try:
-        insert_into_adresse(conn,values)
+    try: 
+        insert_into_utilisateur(conn, values)
     except:
-        print("")
-    values['id_adresse'] = get_adresse_id_from_data(conn, values)
-    if values['id_adresse'] != "":
-        try:
-            insert_into_utilisateur(conn, values)
-        except:
-            print("")
-        values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
-        if values['id_utilisateur'] != "":
-            insert_into_adherent(conn,values)
+        print("Erreur lors de l'insertion dans la table Utilisateur")
+    values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
+    if values['id_utilisateur'] != "":
+        insert_into_adherent(conn,values)
+        insert_into_adresse(conn,values)
 
 def delete_adherent(conn):
     login = input("Login de l'adhérent à supprimer: ")
