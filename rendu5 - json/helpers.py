@@ -56,6 +56,15 @@ def get_prets_en_cours_from_login(conn, login):
     if len(results) >0:
         return results[0][0]
     return None
+def get_prets_en_cours_from_login2(conn, login):
+    query = f"""
+            SELECT login , id, prets FROM pretadherent
+            WHERE login LIKE '{login}%' AND prets->>'dateRetour' IS NULL
+    """
+    results = execute_query(conn, query)
+    if len(results) >0:
+        return results[0]
+    return None
 
 def get_film_exemplaires(conn, titre):
     query = f"""
@@ -815,80 +824,98 @@ def insert_realisateur(conn, film):
         """
     execute_query(conn,query)
 
-def display_prêts(conn,prêt):
-    print(f"Date prêt: {prêt['datePret']}")
-    print(f"Date retour: {prêt['dateRetour']}")
-    print(f"Etat retour: {prêt['etatRetour']}")
-    print(f"Durée: {prêt['duree']}")
-    print(f"Type: {prêt['type']}")
+def display_prêts(conn,login, id_adherent, prêt):
+    #print(prêt)
+    pret = prêt[0]
+    print(f"Date prêt: {pret['datePret']}")
+    print(f"Date retour: {pret['dateRetour']}")
+    print(f"Etat retour: {pret['etatRetour']}")
+    print(f"Durée: {pret['duree']}")
+    print(f"Type: {pret['type']}")
     print("\n")
     print("1. Enregister le rendu du prêt")
     print("2. Supprimer le prêt")
     print("3. Retour")
     choice = int(input("Que voulez_vous faire ? : "))
     if choice ==2: 
-        delete_prêt(conn, prêt)
+        delete_prêt(conn,id_adherent, pret)
     elif choice ==1: 
-        rendre_prêt(conn, prêt)
+        rendre_prêt(conn, id_adherent, pret)
 
-def delete_prêt(conn, pret):
-    if pret[3] is None:
-        query =        f"""UPDATE Exemplaire
-        SET disponible = 'true'
-        WHERE id = '{pret[20]}';"""
-        execute_query(conn,query)
-    if pret[4]:
-        query =        f"""UPDATE Exemplaire
-        SET etat = '{pret[4]}'
-        WHERE id = '{pret[20]}';"""
-        execute_query(conn,query)
+def delete_prêt(conn, id_adherent, pret):
+    print(pret)
+    select_query = f"""
+    select E->>'id', E->>'etat', E->>'disponible' 
+    from {pret['type']} P, json_array_elements (P.exemplaires) E
+    where id = {id_adherent}"""
+    exemplaires = execute_query(conn, select_query)
+    update_query = f"""
+    UPDATE {pret['type']}
+    SET exemplaires = '{json.dumps([{'id' :exemplaire[0],  'etat' :exemplaire[1], 'disponible' : True if exemplaire[0] == pret['exemplaireId'] else exemplaire[2]} for exemplaire in exemplaires])}'
+    WHERE id = {id_adherent} ;"""
+    execute_query(conn,update_query)
+    
     query = f"""
-        DELETE FROM Pret
-        WHERE id = '{pret[0]}'
+        UPDATE Adherent
+        SET prets = '{json.dumps([])}'
+        WHERE id = {id_adherent}
         """
     execute_query(conn,query)
 
-def insert_into_sanction(connection, values):
+def insert_into_sanction(connection,id_adherent, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Sanction (id_adherent, DateSanction, motif, montant) VALUES ({}, {}, {}, {})").format(
-            sql.Literal(values['id_adherent']),
-            sql.Literal(values['DateSanction']),
-            sql.Literal(values['motif']),
-            sql.Literal(values['montant'])
-        )
-        cursor.execute(insert_query)
-        connection.commit()
-        print("Insertion réussie dans la table Sanction")
+        select_query = f"""SELECT id, numerotelephone, datenaissance, statut , sanctions FROM Adherent WHERE id = '{values['id_adherent']}';"""
+        cursor.execute(select_query)
+        adherent = cursor.fetchone()
+        sanctions = adherent[4]
+        if id_adherent == adherent[0]:
+            sanctions = json.loads(sanctions)
+            sanctions.append({"motif": values["motif"], "dateSanction": values["dateSanction"], "dateFinSanction" : values["dateFinSanction"], "montant": values["montant"], "paye" :values["paye"]})
+            update_query = f"""UPDATE Adherent SET sanctions = '{json.dumps(sanctions)}' WHERE id = '{values['id_adherent']}';"""
+            cursor.execute(update_query)
+            connection.commit()
+            print("Insertion réussie  de sanction dans la table Adherent")
     except (Exception, psycopg2.Error) as error:
-        print("Erreur lors de l'insertion dans la table Sanction:", error)
+        print("Erreur lors de l'insertion dans la table Adherent:", error)
     finally:
         if cursor:
             cursor.close()
+    
 
-def rendre_prêt(conn, pret):
+def rendre_prêt(conn, id_adherent, pret):
     etat_retour = input("Etat retour (Abime, Neuf, Bon, Perdu): ")
-    date_retour = datetime.strptime(input("Date retour (YYYY-MM-DD): "), '%Y-%m-%d').date()
-    if etat_retour != pret[13] or pret[1] + timedelta(days=pret[2]) < date_retour:
+    date_retour = input("Date retour (format YYYY-MM-DD): ")
+    print(pret)
+    if etat_retour != pret['etatRetour'] or (datetime.strptime(pret['datePret'], '%Y-%m-%d') + timedelta(days=pret['duree'])).strftime('%Y-%m-%d') < date_retour:
         values ={}
-        values["id_adherent"]= get_utilisateur_id_from_login(conn,pret[8])
+        values["id_adherent"]= id_adherent
         values["DateSanction"] = datetime.now()
-        if etat_retour != pret[13]:
+        if etat_retour != pret['etatRetour']:
             values["motif"]="Deterioration"
             if etat_retour == "Perdu":
                 values["motif"]="Perte"
             values["montant"]=int(input("Montant à payer pour détérioration: "))
-        elif pret[1] + timedelta(days=pret[2]) < date_retour:
+        elif (datetime.strptime(pret['datePret'], '%Y-%m-%d') + timedelta(days=pret['duree'])).strftime('%Y-%m-%d') < date_retour:
             values["motif"]="Retard"
             values["montant"]=int(input("Montant à payer pour retard: "))
-        insert_into_sanction(conn,values)
-    query =        f"""UPDATE Pret
-        SET etatretour = '{etat_retour}', dateretour = '{date_retour}'
-        WHERE id = '{pret[0]}';"""
+        insert_into_sanction(conn,id_adherent , values)
+
+    query = f"""
+        UPDATE Adherent
+        SET prets = '{json.dumps([{"duree": pret['duree'], "datePret" : pret['datePret'], "dateRetour" : date_retour, "etatRetour": etat_retour, "id" : pret['id'], "exemplaireId": pret['exemplaireId'], "idRessource": pret['idRessource'], "idPersonnel":pret['idPersonnel'], "type" : pret['type']}])}'
+        WHERE id = '{id_adherent}';"""
     execute_query(conn,query)
-    query =        f"""UPDATE Exemplaire
-        SET etat = '{etat_retour}', disponible = 'true'
-        WHERE id = '{pret[20]}';"""
+    select_query = f"""
+    select E->>'id', E->>'etat', E->>'disponible'
+    from {pret['type']} P, json_array_elements (P.exemplaires) E
+    where id = {id_adherent}
+    """
+    exemplaires = execute_query(conn, select_query)
+    query = f"""
+        UPDATE {pret['type']}
+        SET exemplaires = '{json.dumps([{'id' :exemplaire[0],  'etat' :etat_retour, 'disponible' : True if etat_retour not in ('Abime', 'Perdu') else False} for exemplaire in exemplaires])}'
+        WHERE id = {id_adherent} ;"""
     execute_query(conn,query)
 
 def update_status_adherent(conn):
@@ -1341,7 +1368,7 @@ def pay_sanction(conn, id_adherent):
     
     query = f"""
     UPDATE Adherent
-    SET sanctions = '{json.dumps([{"dateSanction": sanction[0], "dateFinSanction": sanction[1], "motif": sanction[2], "montant": sanction[3], "paye": 1} for sanction in sanctions])}'
+    SET sanctions = '{json.dumps([{"motif" : sanction[0], "dateSanction" :sanction[1],"dateFinSanction": sanction[2], "montant":sanction[3], "paye":1} for sanction in sanctions])}'
     WHERE id = '{id_adherent}';
     """
     execute_query(conn,query)
@@ -1361,15 +1388,9 @@ def set_end_date_sanction(conn, id_adherent):
     execute_query(conn,query)
 
 def delete_sanction(conn, id_adherent):
-    query2 = f"""
-    SELECT S->>'motif', S->>'dateSanction', S->>'dateFinSanction', S->>'montant', S->>'paye'
-    FROM Adherent, JSON_ARRAY_ELEMENTS(Adherent.sanctions) AS S
-    WHERE id  = '{id_adherent}' ;"""
-    
-    sanctions = execute_query(conn, query2)
     query = f"""
     UPDATE Adherent 
-    set sanctions = '{json.dumps([{"motif" : " ", "dateSanction": " ", "dateFinSanction": " ", "montant": " ", "paye": " "}])}'
+    set sanctions = '{json.dumps([ ])}'
     where id = '{id_adherent}' ;"""
     execute_query(conn,query)
 

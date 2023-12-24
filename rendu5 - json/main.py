@@ -2,7 +2,7 @@ import os
 import psycopg2
 from constants import POSTGRES_DB, POSTGRES_HOST, POSTGRES_PASSWORD, POSTGRES_PORT, POSTGRES_USER, ADMIN_PASSWORD
 
-from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, global_stats, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt, recommandations, get_ressource_data, get_user_data
+from helpers import check_credentials, display_film_adherent, display_livre_adherent, display_musique_adherent, display_prêts, get_film_ressources, get_musique_ressources, get_livre_ressources, display_livre, display_musique, display_film, get_prets_en_cours_from_login, get_prets_en_cours_from_login2, global_stats, handle_sanctions, handle_sanctions_adherent, handle_utilisateurs, choose_table, insert_prêt, recommandations, get_ressource_data, get_user_data
 
 # Search
 def option_1(conn,login):
@@ -94,21 +94,34 @@ def option_3(conn,login_personnel):
     print(f"Prêts en cours des logins commençant par {login}")
     print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format("Index","Date prêt", "Durée", "Date retour", "Titre","Prenom", "Nom", "Login"))
     print("=" * 90)
-    for index, row in enumerate(prêts):
-        ressource_data = get_ressource_data(conn,row["idRessource"], row["type"])
-        user_data = get_user_data(conn,login)
-        print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row["datePret"], row["dateRetour"], row["etatRetour"],ressource_data[1][:14],user_data[3],user_data[4], user_data[1]))
-    print("=" * 90)
-    print("\n")
-    print("1. Ajouter un nouveau prêt")
-    print("2. Gérer un prêt")
-    print("3. Retour")
-    choice = int(input("Que voulez_vous faire ? : "))
-    if choice ==2: 
-        index = int(input("Index du prêt à modifier (-1 retour) : "))
-        display_prêts(conn,prêts[index])
-    elif choice ==1: 
-        insert_prêt(conn,login_personnel)
+    #print(prêts)
+    if prêts != None:
+        for index, row in enumerate(prêts):
+            ressource_data = get_ressource_data(conn, row["idRessource"], row["type"])
+            user_data = get_user_data(conn,login)
+            print("{:5} {} {:<5} {} {:<15} {:<15} {:<15} {:<15}".format(index, row["datePret"], row["dateRetour"], row["etatRetour"],ressource_data[1][:14],user_data[3],user_data[4], user_data[1]))
+        print("=" * 90)
+        print("\n")
+        print("1. Ajouter un nouveau prêt")
+        print("2. Gérer un prêt")
+        print("3. Retour")
+        choice = int(input("Que voulez_vous faire ? : "))
+        prêt = get_prets_en_cours_from_login2(conn, login)
+        #print(prêt[0], prêt[1], prêt[2])
+        log = prêt[0]
+        id_adherent = prêt[1]  
+        prêt = prêt[2]
+        if choice == 3:
+            return
+        
+        if choice ==2: 
+            index = int(input("Index du prêt à modifier (-1 retour) : "))
+            display_prêts(conn, log, id_adherent, prêt)
+        elif choice ==1: 
+            insert_prêt(conn,login_personnel)
+    else:
+        print("Choix invalide. Veuillez réessayer.")
+        option_3(conn,login_personnel)
 
 def option_adherent_2(conn,login):
     os.system('cls')
