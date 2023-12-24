@@ -934,28 +934,29 @@ def handle_personnel(conn):
     mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
-        handle_personnel(conn)
-    else:
-        login = input("Entrez login recherché: ")
-        personnel = get_personnel_details(conn, login)
-        print("\nMembres du personnel :")
-        for index, membre in enumerate(personnel):
-                print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
-        print("\n1. Ajouter membre")
-        print("2. Supprimer membre")
-        print("3. Retour")
-        choice = int(input("Que voulez_vous faire ? : "))
-        if choice == 1:
-                    insert_personnel(conn)
-        elif choice == 2:
-                    delete_personnel(conn)
+        return
+    login = input("Entrez login recherché: ")
+    personnel = get_personnel_details(conn, login)
+    print("\nMembres du personnel :")
+    for index, membre in enumerate(personnel):
+            print("{:<10} {:<10} {:<15} {:15} {:<15}".format(index+1,membre[1], membre[3], membre[4], membre[5]))
+    print("\n1. Ajouter membre")
+    print("2. Supprimer membre")
+    print("3. Retour")
+    choice = int(input("Que voulez_vous faire ? : "))
+    if choice == 1:
+                insert_personnel(conn)
+    elif choice == 2:
+                delete_personnel(conn)
 
 def handle_adherent(conn):
     login = input("Entrez login recherché: ")
     adherent = get_adherent_details(conn, login)
     print("\nAdhérents :")
+    print("{:<10} {:<15} {:15} {:<15} ".format("Prenom", "Nom", "Email", "Statut"))
     for index, membre in enumerate(adherent):
-            print("{:<10} {:<10} {:<15} {:<15} {:<15} {:<15} ".format(index+1,membre[1], membre[3], membre[4], membre[5], membre[9]))
+        print("{:<10} {:<15} {:15} {:<15} ".format(membre[3], membre[4], membre[5], membre[9]))
+
     print("\n1. Ajouter membre")
     print("2. Supprimer membre")
     print("3. Modifier statut adherent")
@@ -967,7 +968,7 @@ def handle_adherent(conn):
                 delete_adherent(conn)
     elif choice == 3:
         update_status_adherent(conn)
-
+        
 def insert_into_adresse(connection, values):
     print(values)
     try:
@@ -987,11 +988,17 @@ def insert_into_adresse(connection, values):
             cursor.close()
 
 def insert_into_utilisateur(connection, values):
-    print(values)
     try:
-        cursor =connection.cursor()
-        insert_query = f"""
-        INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ('{values['login']}', '{values['password']}', '{values['prenom']}', '{values['nom']}', '{values['email']}', '{json.dumps([{"rue": values["rue"], "numero": values["numero"], "codePostal" : values["codePostal"], "ville": values["ville"]}])}'))"""
+        cursor = connection.cursor()
+        adresse_json = json.dumps(values['adresse'])
+        insert_query = sql.SQL("INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES ( {}, {}, {}, {}, {}, {})").format(
+            sql.Literal(values['login']),
+            sql.Literal(values['password']),
+            sql.Literal(values['prenom']),
+            sql.Literal(values['nom']),
+            sql.Literal(values['email']),
+            sql.Literal(adresse_json)
+        )
         cursor.execute(insert_query)
         connection.commit()
         print("Insertion réussie dans la table Utilisateur")
@@ -1015,7 +1022,7 @@ def insert_into_personnel(connection, values):
     finally:
         if cursor:
             cursor.close()
-
+            
 # Exemple d'insertion dans la table Adherent
 def insert_into_adherent(connection, values):
     try:
@@ -1044,7 +1051,6 @@ def get_adresse_rue_from_data(conn, values):
         return execute_query(conn, query)
     except:
         return ""
-
 def get_utilisateur_id_from_login(conn, login):
     try:
         query = f"""
@@ -1094,27 +1100,35 @@ def delete_personnel(conn):
 
 def insert_adherent(conn):
     os.system("cls")
-    values = {}
-    values['login'] = input("Login: ")
-    values['password'] = input("Password: ")
-    values['prenom'] = input("Prenom: ")
-    values['nom'] = input("Nom: ")
-    values['email'] = input("Email: ")
-    values['numeroTelephone'] = input("numero de téléphone: ")
-    values['dateNaissance'] = input("Date de naissance (YYYY-MM-DD): ")
-    values['statut'] = "active"
-    values['rue'] = input("Rue: ")
-    values['numero'] = input("N°: ")
-    values['codePostal'] = input("Code Postal: ")
-    values['ville'] = input("Ville: ")
-    try: 
-        insert_into_utilisateur(conn, values)
+    valuesUtilisteur = {}
+    valuesAdherent = {}
+    
+    adress = {}
+    valuesUtilisteur['login'] = input("Login: ")
+    valuesUtilisteur['password'] = input("Password: ")
+    valuesUtilisteur['prenom'] = input("Prenom: ")
+    valuesUtilisteur['nom'] = input("Nom: ")
+    valuesUtilisteur['email'] = input("Email: ")
+    adress['rue'] = input("Rue: ")
+    adress['numero'] = input("N°: ")
+    adress['codePostal'] = input("Code Postal: ")
+    adress['ville'] = input("Ville: ")
+    valuesUtilisteur['adresse'] = adress
+
+    valuesAdherent['numeroTelephone'] = input("numero de téléphone: ")
+    valuesAdherent['dateNaissance'] = input("Date de naissance (YYYY-MM-DD): ")
+    valuesAdherent['statut'] = "active"
+    valuesAdherent['sanctions'] = []
+    valuesAdherent['prets'] = []
+    
+    
+    try:
+        insert_into_utilisateur(conn, valuesUtilisteur)
     except:
-        print("Erreur lors de l'insertion dans la table Utilisateur")
-    values['id_utilisateur'] = get_utilisateur_id_from_login(conn, values["login"])
-    if values['id_utilisateur'] != "":
-        insert_into_adherent(conn,values)
-        insert_into_adresse(conn,values)
+        print("")
+    valuesAdherent['id'] = get_utilisateur_id_from_login(conn, valuesUtilisteur["login"])
+    if valuesAdherent['id'] != "":
+        insert_into_adherent(conn,valuesAdherent)
 
 def delete_adherent(conn):
     login = input("Login de l'adhérent à supprimer: ")

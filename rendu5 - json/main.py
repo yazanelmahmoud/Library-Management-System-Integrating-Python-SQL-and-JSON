@@ -406,7 +406,7 @@ def afficher_menu():
     print("2. Ajouter Livre / Musique / Film")
     print("3. Gérer les prêts")
     print("4. Gérer les sanctions ")
-    print("5. Gérer les utilisateurs (à faire)")
+    print("5. Gérer les utilisateurs")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
     print("8. Supprimer une table (Administrateur)")
