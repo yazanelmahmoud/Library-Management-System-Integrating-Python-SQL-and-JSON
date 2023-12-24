@@ -162,7 +162,7 @@ def option_5(conn,login):
 # Visualiser les tables
 def option_6(conn,login):
     os.system('cls')
-    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
+    mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
@@ -190,19 +190,18 @@ def option_6(conn,login):
         choice = input("Choisissez une table pour voir son contenu (0 pour retour) : ")
         if choice == '0':
             return
-        elif choice in [str(i) for i in range(1, len(tables) + 1)]:
+        elif choice in [str(i) for i in range(1, len(tables)+1)]:
             try:
-                table_name = tables[int(choice) - 1][0]
-                sql = f"""SELECT * FROM {table_name};"""
+                sql = f"""SELECT * FROM {tables[int(choice)-1][0]};"""
                 cur = conn.cursor()
                 cur.execute(sql)
                 rows = cur.fetchall()
-
+                
                 if not rows:
-                    print(f"Aucune donnée trouvée dans la table {table_name}.")
+                    print(f"Aucune donnée trouvée dans la table {tables[int(choice)-1][0]}.")
                     return
 
-                print(f"\nVoici le contenu de la table {table_name} :")
+                print(f"\nVoici le contenu de la table {tables[int(choice)-1][0]} :")
                 print("=" * 40)
 
                 # Exibindo cabeçalho
@@ -212,8 +211,7 @@ def option_6(conn,login):
 
                 # Exibindo dados
                 for i, row in enumerate(rows, start=1):
-                    formatted_row = " | ".join(map(str, row))
-                    print(f"{formatted_row}")
+                    print(f"{row}")
 
                 print("=" * 40)
 
@@ -229,7 +227,7 @@ def option_6(conn,login):
 def option_7(conn,login):
     os.system('cls')
     # Il faut que l'utilisateur soit un administrateur
-    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
+    mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
@@ -268,7 +266,6 @@ def option_7(conn,login):
         print("3. DATE")
         print("4. FLOAT")
         print("5. BOOLEAN")
-        print("6. JSON")
         
         while True:
             type_colonne = input("Entrez votre choix : ")
@@ -292,11 +289,7 @@ def option_7(conn,login):
             elif type_colonne == '5':
                 type_colonne = "BOOLEAN"
                 break
-            
-            elif type_colonne == '6':
-                type_colonne = "JSON"
-                break
-            
+
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 continue
@@ -304,11 +297,7 @@ def option_7(conn,login):
         while True:
             primary_key = input("Est-ce que c'est une clé primaire ? (O/N) : ")
             if primary_key in ('O', 'o','N', 'n'):
-                if type_colonne == '6':
-                    print("Choix invalide. Veuillez réessayer.")
-                    continue
-                else:
-                    break
+                break
             else:
                 print("Choix invalide. Veuillez réessayer.")
                 continue
@@ -341,11 +330,11 @@ def option_7(conn,login):
             continue
         else:
             print("Choix invalide. Veuillez réessayer.")
-
+            
 #Supprimer une table
 def option_8(conn,login):
     os.system('cls')
-    mot_de_passe = input("Entrez le mot de passe de l'administrateur : ")
+    mot_de_passe = input("Entrez le mot de passe : ")
     if mot_de_passe != ADMIN_PASSWORD:
         print("Mot de passe incorrect !")
         return
@@ -390,7 +379,8 @@ def option_8(conn,login):
                 conn.rollback()
         else:
             print("Choix invalide. Veuillez réessayer.")
-       
+            
+
 def option_9(conn,login):
     os.system('cls')
     print("Voulez-vous voir les statistiques de quelle ressource : ?")
@@ -414,13 +404,8 @@ def afficher_menu():
     print("\n=============== Menu Personnel ===============")
     print("1. Recherche Livre / Musique / Film")
     print("2. Ajouter Livre / Musique / Film")
-<<<<<<< HEAD
     print("3. Gérer les prêts")
     print("4. Gérer les sanctions ")
-=======
-    print("3. Gérer les prêts (reste une requête ) ")
-    print("4. Gérer les sanctions  (à faire)")
->>>>>>> bb83b712423fcdfadd2ca2caa978e8a1cdde9186
     print("5. Gérer les utilisateurs")
     print("6. Visualiser les tables (Administrateur)")
     print("7. Créer une nouvelle table (Administrateur)")
