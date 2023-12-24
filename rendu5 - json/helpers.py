@@ -1027,11 +1027,13 @@ def insert_into_personnel(connection, values):
 def insert_into_adherent(connection, values):
     try:
         cursor = connection.cursor()
-        insert_query = sql.SQL("INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut) VALUES ({}, {}, {}, {})").format(
-            sql.Literal(values['id_utilisateur']),
+        insert_query = sql.SQL("INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES ({}, {}, {}, {}, {},{})").format(
+            sql.Literal(values['id']),
             sql.Literal(values['numeroTelephone']),
             sql.Literal(values['dateNaissance']),
-            sql.Literal(values['statut'])
+            sql.Literal(values['statut']),
+            sql.Literal(values['sanctions']),
+            sql.Literal(values['prets'])
         )
         cursor.execute(insert_query)
         connection.commit()
