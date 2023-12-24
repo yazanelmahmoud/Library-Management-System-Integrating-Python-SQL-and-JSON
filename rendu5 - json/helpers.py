@@ -1257,6 +1257,16 @@ def get_active_sanctions_from_login(conn,login):
     """
     results = execute_query(conn, query)
     return results
+def get_active_sanctions_from_login2(conn,login):
+    query = f"""
+            SELECT login, id ,sanctions FROM pretadherent
+            WHERE login LIKE '{login}%' AND (
+                (sanctions->>'dateFinSanction' IS NULL OR (sanctions->>'dateFinSanction')::DATE > CURRENT_DATE) 
+                OR (sanctions->>'paye' = 'false' OR sanctions->>'paye' IS NULL)
+            )
+    """
+    results = execute_query(conn, query)
+    return results
 
 def handle_sanctions(conn):
             os.system("cls")
@@ -1275,14 +1285,15 @@ def handle_sanctions(conn):
                         f'{sanction["dateFinSanction"]}' if sanction["dateFinSanction"] is not None else "",
                         sanction["motif"] if sanction["motif"] is not None else "",
                         sanction["montant"] if sanction["montant"] is not None else "",
-                        'Oui' if sanction["paye"] is not None or sanction["paye"]==1 else "Non"
+                        'Oui' if sanction["paye"]==1 else "Non"
                     ))
             print("=" * 90)
             print("\n")
             choice = int(input("Sélectionnez un index de sanction (-1 retour): "))
+            sanct = get_active_sanctions_from_login2(conn,login)
             if choice in range(-1, len(sanctions)+1):
                 if choice != -1 and choice !=0:
-                    handle_sanction(conn, sanctions[choice-1])
+                    handle_sanction(conn, sanct[choice-1])
 
 def handle_sanctions_adherent(conn,login):
             os.system("cls")
@@ -1299,7 +1310,7 @@ def handle_sanctions_adherent(conn,login):
                         f'{sanction["dateFinSanction"]}' if sanction["dateFinSanction"] is not None else "",
                         sanction["motif"] if sanction["motif"] is not None else "",
                         sanction["montant"] if sanction["montant"] is not None else "",
-                        'Oui' if sanction["paye"] is not None or sanction["paye"]==1 else "Non"
+                        'Oui' if sanction["paye"]==1 else "Non"
                     ))
             print("=" * 90)
             print("\n")
@@ -1319,28 +1330,47 @@ def handle_sanction(conn, sanction):
     elif choice == 3:
         delete_sanction(conn, sanction[1])
 
-def pay_sanction(conn, id_sanction):
+def pay_sanction(conn, id_adherent):
+    
+    query2 = f""" 
+    SELECT S->>'motif', S->>'dateSanction', S->>'dateFinSanction', S->>'montant', S->>'paye'
+    FROM Adherent, JSON_ARRAY_ELEMENTS(Adherent.sanctions) AS S
+    WHERE id  = '{id_adherent}' ;"""
+    
+    sanctions = execute_query(conn, query2)
+    
     query = f"""
-    UPDATE Sanction
-    SET paye = 'true'
-    WHERE id_sanction = '{id_sanction}';
+    UPDATE Adherent
+    SET sanctions = '{json.dumps([{"dateSanction": sanction[0], "dateFinSanction": sanction[1], "motif": sanction[2], "montant": sanction[3], "paye": 1} for sanction in sanctions])}'
+    WHERE id = '{id_adherent}';
     """
     execute_query(conn,query)
 
-def set_end_date_sanction(conn, id_sanction):
+def set_end_date_sanction(conn, id_adherent):
     date = input("Date de fin sanction (YYYY-MM-DD): ")
+    query2 = f"""
+    SELECT S->>'motif', S->>'dateSanction', S->>'dateFinSanction', S->>'montant', S->>'paye'
+    FROM Adherent, JSON_ARRAY_ELEMENTS(Adherent.sanctions) AS S
+    WHERE id  = '{id_adherent}' ;"""
+    sanctions = execute_query(conn, query2)
     query = f"""
-    UPDATE Sanction
-    SET datefinsanction = '{date}'
-    WHERE id_sanction = '{id_sanction}';
+    UPDATE Adherent
+    SET sanctions = '{json.dumps([{"motif": sanction[0], "dateSanction": sanction[1], "dateFinSanction": date if sanction[2] is None or sanction[2]=='null' else sanction[2],   "montant": sanction[3], "paye": sanction[4]} for sanction in sanctions])}' 
+    WHERE id = '{id_adherent}';
     """
     execute_query(conn,query)
 
-def delete_sanction(conn, id_sanction):
+def delete_sanction(conn, id_adherent):
+    query2 = f"""
+    SELECT S->>'motif', S->>'dateSanction', S->>'dateFinSanction', S->>'montant', S->>'paye'
+    FROM Adherent, JSON_ARRAY_ELEMENTS(Adherent.sanctions) AS S
+    WHERE id  = '{id_adherent}' ;"""
+    
+    sanctions = execute_query(conn, query2)
     query = f"""
-    DELETE FROM Sanction
-    WHERE id_sanction = '{id_sanction}';
-    """
+    UPDATE Adherent 
+    set sanctions = '{json.dumps([{"motif" : " ", "dateSanction": " ", "dateFinSanction": " ", "montant": " ", "paye": " "}])}'
+    where id = '{id_adherent}' ;"""
     execute_query(conn,query)
 
 def check_credentials(conn, login, pwd):
