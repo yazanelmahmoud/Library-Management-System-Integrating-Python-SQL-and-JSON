@@ -1,4 +1,3 @@
-
 INSERT INTO Livre ( titre, dateApparition, editeur, genre, codeClassification, dureeMaxPret, ISBN, resume, langue, contributeur, exemplaires ) VALUES 
 ('Le Seigneur des Anneaux : La Communauté de l Anneau', '2001-12-19', 'Christian Bourgois', 'Fantasy', 2, 14, '9782266121029', 'Un jeune hobbit du nom de Frodo Baggins hérite d un anneau magique et entreprend un voyage périlleux pour le détruire.', 'français', '{"auteur": [{"nom": "J.R.R.", "prenom": "Tolkien","dateNaissance": "03/01/1892", "nationalite":"britannique"}]}', '[{"id": 4, "etat": "Neuf", "disponible": true}, {"id": 5, "etat": "Bon", "disponible": true}, {"id": 6, "etat": "Abime", "disponible": true}]' ),
 ('Les Misérables', '1862-01-14', 'A. Lacroix, Verboeckhoven & Cie', 'Roman Historique', 3, 20, '9782266116131', 'L histoire épique de Jean Valjean, un ancien bagnard, et de son parcours pour la rédemption dans la France du XIXe siècle.', 'français', '{"auteur": [{"nom": "Victor", "prenom": "Hugo","dateNaissance": "26/02/1802", "nationalite":"française"}]}', '[{"id": 7, "etat": "Neuf", "disponible": true}, {"id": 8, "etat": "Bon", "disponible": true}, {"id": 9, "etat": "Abime", "disponible": true}]' ),
@@ -22,9 +21,9 @@ INSERT INTO Utilisateur (login, password, prenom, nom, email, adresse) VALUES
 ('utilisateur5', 'mdp123', 'Pierre', 'Petit', 'pierre@example.com', '{"rue": "Rue de la Gare", "numero": 50, "codePostal": "59000", "ville": "Lille"}');
 
 INSERT INTO Adherent (id, numeroTelephone, dateNaissance, statut, sanctions, prets) VALUES
-(1, '0123456789', '2002-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-12-15", "dateFinSanction":"null", "montant":10, "paye":0}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 303, "exemplaireId": 102,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]'),
-(2, '0456926843', '1995-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-11-12", "dateFinSanction":"null", "montant":10, "paye":1}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 304, "exemplaireId": 102,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]'),
-(3, '0634434566', '2003-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-09-20", "dateFinSanction":"null", "montant":10, "paye":0}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 305, "exemplaireId": 102,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]');
+(1, '0123456789', '2002-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-12-15", "dateFinSanction":"null", "montant":10, "paye":0}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 303, "exemplaireId": 5,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]'),
+(2, '0456926843', '1995-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-11-12", "dateFinSanction":"null", "montant":10, "paye":1}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 304, "exemplaireId": 6,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]'),
+(3, '0634434566', '2003-01-01', 'active', '[{"motif":"deterioration", "dateSanction":"2023-09-20", "dateFinSanction":"null", "montant":10, "paye":0}]','[{"duree": 20, "datePret": "2023-12-01","dateRetour": "2023-12-10", "etatRetour":"Bon", "id": 305, "exemplaireId": 7,"idRessource": 1, "idPersonnel": 1, "type": "Livre"}]');
 
 INSERT INTO Personnel (id) VALUES
 (2);
